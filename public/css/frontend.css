@@ -1,0 +1,129 @@
+html, body {
+ 
+  background-color: #4f5a64;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "colfax","Helvetica Neue","Helvetica",Helvetica,Arial,sans-serif;
+  font-weight: 300;
+  font-style: normal;
+  color: #e7e5e3;
+  text-rendering: optimizeLegibility;
+  margin-top: 0.2rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
+}
+
+.top-bar {
+  position: fixed;
+  left: 50px;
+  padding: 0;
+  z-index: 101;
+  top: 20px;
+}
+
+.top-bar .top-bar-section {
+  float: left;
+  overflow: hidden;
+  background-color: #4f5a64;
+}
+
+.top-bar .top-bar-section .menu {
+  background: transparent;
+  float: left;
+  margin-left: 1px;
+}
+
+.top-bar .top-bar-section .menu li {
+  margin-right: 1px;
+}
+
+.top-bar .top-bar-section .menu li a {
+  background-color: #7da1ae;
+}
+
+.top-bar, .top-bar a:hover, .top-bar a.active, .displayMode a:hover, .displayMode a.active {
+  color: white;
+  background-color: #1a9dbc !important;
+  background: #1a9dbc !important;
+}
+
+.top-bar-section ul li>a {
+  display: block;
+  width: 100%;
+  color: #eeeeee;
+  padding: 12px 0 12px 0;
+  padding-left: 15px;
+  font-family: "colfax","Helvetica",Helvetica,Arial,sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 300;
+  
+}
+
+.top-bar .title-area {
+  position: relative;
+  margin: 0;
+}
+
+.top-bar .name {
+  height: 45px;
+  margin: 0;
+  font-size: 16px;
+}
+
+.top-bar .name h1 {
+  line-height: 45px;
+  font-size: 1.0625rem;
+  margin: 0;
+}
+
+.top-bar .name h1 a {
+  font-weight: normal;
+  color: #eeeeee;
+  font-size: 1.0625rem;
+  display: block;
+  padding: 0 15px;
+}
+
+.top-bar h1 a {
+  background-color: #1a9dbc;
+  color: white !important;
+}
+
+
+.phaidra-logo {
+ height: 30px;
+}
+
+.fade {
+  opacity: 0;
+  -webkit-transition: opacity .15s linear;
+          transition: opacity .15s linear;
+}
+.fade.in {
+  opacity: 1;
+}
+
+.reveal-modal.fade {
+  -webkit-transition: -webkit-transform .3s ease-out;
+     -moz-transition:    -moz-transform .3s ease-out;
+       -o-transition:      -o-transform .3s ease-out;
+          transition:         transform .3s ease-out;
+  -webkit-transform: translate(0, -25%);
+      -ms-transform: translate(0, -25%);
+          transform: translate(0, -25%);
+}
+.reveal-modal.in {
+  -webkit-transform: translate(0, 0);
+      -ms-transform: translate(0, 0);
+          transform: translate(0, 0);
+}
+
+.reveal-modal-bg.fade {
+  filter: alpha(opacity=0);
+  opacity: 0;
+}
+.reveal-modal-bg.in {
+  filter: alpha(opacity=50);
+  opacity: .5;
+}

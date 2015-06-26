@@ -1,0 +1,9 @@
+% layout 'default', title => 'Phaidra Push';
+
+%= include 'alerts'
+
+	<div class="home-div">
+
+
+
+	</div>

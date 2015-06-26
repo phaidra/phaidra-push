@@ -1,0 +1,41 @@
+{
+    "installation_id": "phaidrapush-rastanb",
+    "mode": "production",
+    "secret": "secret",
+    "enc_key": "secret",
+    "session_expiration": "7200",
+    "secure_cookies": "0",
+    "log_path": "/var/log/phaidra/phaidrapush.log",
+    "log_level": "debug",
+
+    "hypnotoad": {
+        "listen": ["http://*:3001"],
+        "proxy": 1
+    },
+
+    "phaidra-temp": {
+        "baseurl": "phaidra-temp.univie.ac.at",
+        "apibaseurl": "services.phaidra-temp.univie.ac.at/api/"
+    },
+
+    "phaidra": {
+        "baseurl": "phaidra.univie.ac.at",
+        "apibaseurl": "services.phaidra.univie.ac.at/api/"
+    },
+
+    "mongodb_phaidrapush": {
+        "host": "stage.phaidra.org",
+        "port": "27017",
+        "username": "phaidrapush",
+        "password": "secret",
+        "database": "phaidrapush"
+    },
+
+    "authentication": {
+        "realm": "Phaidra",
+        "token_header": "XSRF-TOKEN",
+        "token_cookie": "XSRF-TOKEN",
+        "phaidra_api_token_header": "X-XSRF-TOKEN",
+        "phaidra_api_token_cookie": "X-XSRF-TOKEN"
+    }
+}
