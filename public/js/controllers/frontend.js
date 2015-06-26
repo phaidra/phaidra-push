@@ -11,17 +11,16 @@ app.controller('FrontendCtrl', function($scope, $window, $modal, $log, FrontendS
   $scope.initdata = '';
   $scope.current_user = '';
 
-  $scope.acnumbers = [];
-  $scope.inputacnumbers = [];
-
-  $scope.allselected = false;
+  $scope.temp_objects = [];
+  $scope.prod_objects = [];
 
   $scope.init = function (initdata) {
     $scope.initdata = angular.fromJson(initdata);
     $scope.current_user = $scope.initdata.current_user;
     $scope.baseurl = $('head base').attr('href');
     if($scope.initdata.load_bags){
-      $scope.getACNumbers();
+      $scope.getObjects(true);
+      $scope.getObjects(false);
     }
   };
 
@@ -42,40 +41,28 @@ app.controller('FrontendCtrl', function($scope, $window, $modal, $log, FrontendS
 
   $scope.selectAll = function () {
     if($scope.allselected){
-      for (var i = 0; i < $scope.acnumbers.length; i++) {
-        $scope.acnumbers[i].selected = false;
+      for (var i = 0; i < $scope.temp_objects.length; i++) {
+        $scope.temp_objects[i].selected = false;
       }
     }else{
-      for (var i = 0; i < $scope.acnumbers.length; i++) {
-	$scope.acnumbers[i].selected = true;
+      for (var i = 0; i < $scope.temp_objects.length; i++) {
+        $scope.temp_objects[i].selected = true;
       }	
     }
   }
 
-  $scope.mapping_alerts_open = function (ac) {
-
-      var modalInstance = $modal.open({
-            templateUrl: $('head base').attr('href')+'views/modals/mapping_alerts.html',
-            controller: AlertsModalCtrl,
-            resolve: {
-              mapping_alerts: function(){
-               return ac.mapping_alerts;
-              }
-            }
-      });
-  };
-
-    $scope.addACNumbers = function(){
-        var promise = FrontendService.addACNumbers($scope.inputacnumbers);
+    $scope.getObjects = function(temp){
+        var promise = FrontendService.getObjects(temp);
         $scope.loadingTracker.addPromise(promise);
         promise.then(
           function(response) {
             $scope.form_disabled = false;
             $scope.alerts = response.data.alerts;
-            $scope.inputacnumbers = [];
-            $scope.getACNumbers();
-            // we use bindonce so we have to do a full refresh
-            $window.location.reload();
+            if(temp){
+              $scope.temp_objects = response.data.objects;
+            }else{
+              $scope.prod_objects = response.data.objects;
+            }
           }
           ,function(response) {
             $scope.form_disabled = false;
@@ -88,134 +75,12 @@ app.controller('FrontendCtrl', function($scope, $window, $modal, $log, FrontendS
         );
     };
 
-    $scope.getACNumbers = function(){
-        var promise = FrontendService.getACNumbers();
-        $scope.loadingTracker.addPromise(promise);
-        promise.then(
-          function(response) {
-            $scope.form_disabled = false;
-            $scope.alerts = response.data.alerts;
-            $scope.acnumbers = response.data.acnumbers;
-          }
-          ,function(response) {
-            $scope.form_disabled = false;
-            if(response.data){
-              if(response.data.alerts){
-                $scope.alerts = response.data.alerts;
-              }
-            }
-          }
-        );
-    };
-
-    $scope.fetchMetadataSelected = function(){
-        var sel = [];
-	for (var i = 0; i < $scope.acnumbers.length; i++) {
-	  if($scope.acnumbers[i].selected == true){
-	    sel.push($scope.acnumbers[i].ac_number);
-          }
-        }
-        $scope.fetchMetadata(sel);
-    }
-
-
-    $scope.fetchMetadata = function(acnumbers){
-        var promise = FrontendService.fetchMetadata(acnumbers);
-        $scope.loadingTracker.addPromise(promise);
-        promise.then(
-          function(response) {
-            $scope.form_disabled = false;
-            $scope.alerts = response.data.alerts;
-            $scope.getACNumbers();
-            $window.location.reload();
-          }
-          ,function(response) {
-            $scope.form_disabled = false;
-            if(response.data){
-              if(response.data.alerts){
-                $scope.alerts = response.data.alerts;
-              }
-            }
-          }
-        );
-    };
-
-    $scope.createBagSelected = function(){
-      var sel = [];
-      for (var i = 0; i < $scope.acnumbers.length; i++) {
-        if($scope.acnumbers[i].selected == true){
-	   sel.push($scope.acnumbers[i].ac_number);
-        }
-      }
-	$scope.createBag(sel);
-    }
-
-    $scope.createBag = function(acnumbers){
-        var promise = FrontendService.createBag(acnumbers);
-        $scope.loadingTracker.addPromise(promise);
-        promise.then(
-          function(response) {
-            $scope.form_disabled = false;
-            $scope.alerts = response.data.alerts;
-            $scope.getACNumbers();
-            $window.location.reload();
-          }
-          ,function(response) {
-            $scope.form_disabled = false;
-            if(response.data){
-              if(response.data.alerts){
-                $scope.alerts = response.data.alerts;
-              }
-            }
-          }
-        );
-    };
 
     $scope.setLang = function(langKey) {
       $translate.use(langKey);
     };
 
-    $scope.has_errors = function(ac){
-      if(ac.mapping_alerts){
-        for (var i = 0; i < ac.mapping_alerts.length; i++) {
-          if(ac.mapping_alerts[i].type == 'danger'){
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-
-    $scope.has_warnings = function(ac){
-      if(ac.mapping_alerts){
-        for (var i = 0; i < ac.mapping_alerts.length; i++) {
-          if(ac.mapping_alerts[i].type == 'warning'){
-            return true;
-          }
-        }
-      }
-      return false;
-    }
 });
-
-var AlertsModalCtrl = function ($scope, $modalInstance, FrontendService, promiseTracker, mapping_alerts) {
-
-  $scope.mapping_alerts = mapping_alerts;
-
-  $scope.baseurl = $('head base').attr('href');
-
-  // we will use this to track running ajax requests to show spinner
-  $scope.loadingTracker = promiseTracker('loadingTrackerFrontend');
-
-  $scope.closeAlert = function(index) {
-      $scope.alerts.splice(index, 1);
-  };
-
-  $scope.ok = function () {
-    $modalInstance.dismiss('ok');
-  };
-};
-
 
 var SigninModalCtrl = function ($scope, $modalInstance, FrontendService, promiseTracker) {
 

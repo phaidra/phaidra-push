@@ -1,49 +1,11 @@
-<!--
-<div id="myModal" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
-  <h2 id="modalTitle">Awesome. I have it.</h2>
-  <p class="lead">Your couch.  It is mine.</p>
-  <p>I'm a cool paragraph that lives inside of an even cooler modal. Wins!</p>
-  <a class="close-reveal-modal" aria-label="Close">&#215;</a>
-</div>
-
-<h3>I'm a modal!</h3>
-    <ul>
-      <li ng-repeat="item in items">
-        <a ng-click="selected.item = item">{{ item }}</a>
-      </li>
-    </ul>
-    <p>Selected: <b>{{ selected.item }}</b></p>
-    <button class="button" ng-click="ok()">OK</button>
-    <a class="close-reveal-modal" ng-click="cancel()">&#215;</a>
--->
-
-
-<div aria-hidden="true" aria-labelledby="modalTitle" role="dialog">
-      
-          <h4 id="modalTitle"><span class="glyphicon glyphicon-lock"></span> Sign in <span class="load-spinner" ng-show="loadingTracker.active()" >...</span></h4>
-
-          <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
-
-          
-            <div class="large-12 columns">
-              <form>
-                 <div class="row">
-                   <div class="large-12 columns">
-                       <input type="text" name="username" placeholder="Username" id="username" ng-model="user.username" ng-keyup="hitEnterSignin($event)" required/>
-                   </div>
-                 </div>
-                <div class="row">
-                   <div class="large-12 columns">
-                       <input type="password" name="password" placeholder="Password" id="password" ng-model="user.password" ng-keyup="hitEnterSignin($event)" required/>
-                   </div>
-                </div>
-                <div class="row">
-                  <div class="large-12 large-centered columns">
-                    <button class="button" ng-click="signin()" ng-disabled="(loginform.$dirty && loginform.$invalid) || loginform.$pristine || form_disabled">Sign In</button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          
-
+<div class="action-modal small" data-reveal>    
+    <h4>Please sign in</h4>
+    <form>
+      <input type="text" name="username" placeholder="username" ng-model="user.username" ng-keyup="hitEnterSignin($event)" required/>
+      <input type="password" name="password" placeholder="password" ng-model="user.password" ng-keyup="hitEnterSignin($event)" required>
+    <div class="modal-actions">
+      <input type="submit" href="#" id="login-modal-login-btn" class="button light" value="login" ng-click="signin()" ng-disabled="(loginform.$dirty && loginform.$invalid) || loginform.$pristine || form_disabled">
+      <div class="right"><img src="img/uni_logo_farbe_02_small.png" height="30"></div>
+    </div>
+    </form>
 </div>

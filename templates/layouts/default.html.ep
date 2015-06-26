@@ -28,7 +28,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-sanitize.js"></script>
 
     <!-- Foundation -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.2/css/foundation.min.css" rel="stylesheet">
+    <!--<link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.2/css/foundation.min.css" rel="stylesheet">-->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.2/css/normalize.min.css" rel="stylesheet">
     <link href="<%= url_for '/css/foundation-icons.css' %>" rel="stylesheet">
 
@@ -44,6 +44,7 @@
     <script type="text/javascript" src="<%= url_for '/js/services/base64.js' %>"></script>
 
     <!-- Custom Phaidra CSS -->
+    <link href="<%= url_for '/css/phaidraplus.css' %>" rel="stylesheet">
     <link href="<%= url_for '/css/frontend.css' %>" rel="stylesheet">
 
     <!-- Bindonce -->
