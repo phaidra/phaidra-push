@@ -7,6 +7,22 @@
   width: 40%;
 }
 
+.footer {
+  display: block;
+}
+
+.username {
+  position: fixed;
+  display: block !important;
+  right: 130px;
+  top: 30px;
+  color: #95a5a6;
+}
+
+#logout-button {
+  display: inline-block;
+}
+
 /* Angular-Foundation fade hack */
 
 .fade {
@@ -40,4 +56,70 @@
 .reveal-modal-bg.in {
   filter: alpha(opacity=50);
   opacity: .5;
+}
+
+.icon-larger {
+  font-size: larger;
+}
+
+.icon-x-large {
+  font-size: x-large;
+}
+
+.tabs {
+  border-bottom: 1px solid #384148;
+  font-size: 1.5rem;  
+  margin-top: 2rem;
+  margin-left: 2rem;
+  width: 80%;
+}
+
+.tabs-content {
+  display: inline-block;
+  margin-top: 20px;
+}
+
+.list-date {
+  color: #e7e5e3;
+}
+
+table {
+  border: none;
+}
+
+tr {
+  border-bottom: 1px solid #384148;
+  
+}
+
+table thead tr th, table thead tr td, table tfoot tr th, table tfoot tr td {
+  color: #e7e5e3;
+}
+
+.tabs dd {
+  border-bottom: none;
+}
+
+.tabs dd > a {
+  background: #4f5a64;  
+}
+
+.tabs dd > a:hover {
+  background: #384148;
+  border-bottom: 3px solid #384148;
+}
+
+.tabs dd.active a {
+  background: #4f5a64;
+  border-bottom: 3px solid #384148;
+}
+
+.tabs dd.active h2 {
+  
+  color: white;
+  font-weight: bold;
+}
+
+table thead, table tfoot {
+  background: none;
 }

@@ -10,7 +10,7 @@ use base 'Mojolicious::Controller';
 # bridge
 sub check {
 	my $self = shift;
-	
+
 	unless($self->is_user_authenticated){
 		$self->flash({opensignin => 1});
 
@@ -24,8 +24,8 @@ sub check {
 	}
 
 	my $init_data = { current_user => $self->current_user };
-	$self->stash(init_data => encode_json($init_data));
-	return 1;
+  $self->stash(init_data => encode_json($init_data));
+  return 1;
 }
 
 sub signin {

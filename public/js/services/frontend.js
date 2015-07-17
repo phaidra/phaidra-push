@@ -11,41 +11,15 @@ angular.module('frontendService', ['Base64'])
              headers: {'Authorization': 'Basic ' + Base64.encode(username + ':' + password)}
          });
     },
-
-    addACNumbers: function(acnumbers) {
-
-         return $http({
-             method  : 'POST',
-             url     : $('head base').attr('href')+'import/acnumbers',
-             data: {acnumbers: acnumbers}
-         });
-    },
-
-    getACNumbers: function(acnumbers) {
+   
+    getObjects: function(temp) {
 
          return $http({
              method  : 'GET',
-             url     : $('head base').attr('href')+'import/acnumbers'
+             url     : $('head base').attr('href')+'objects',
+             params  : { temp: temp ? 1 : 0 }
          });
     },
-
-    fetchMetadata: function(acnumbers) {
-
-         return $http({
-             method  : 'POST',
-             url     : $('head base').attr('href')+'import/fetch',
-             data: {acnumbers: acnumbers}
-         });
-    },
-
-    createBag: function(acnumbers) {
-
-         return $http({
-             method  : 'POST',
-             url     : $('head base').attr('href')+'import/createbag',
-             data: {acnumbers: acnumbers}
-         });
-    }
 
   }
 });

@@ -13,6 +13,12 @@
         "proxy": 1
     },
 
+    "directory_user": {
+        "username": "user",
+        "password": "pass"
+    },
+
+
     "phaidra-temp": {
         "baseurl": "phaidra-temp.univie.ac.at",
         "apibaseurl": "services.phaidra-temp.univie.ac.at/api/"

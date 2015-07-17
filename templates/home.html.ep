@@ -2,8 +2,81 @@
 
 %= include 'alerts'
 
+<center>
 	<div>
-
-
-
+		<tabset>
+		    <tab>
+			    <tab-heading><h2>Phaidra-Temp objects</h2></tab-heading>
+			    <div class="content">
+			    	
+						<table class="table">
+							  <thead>
+								  <tr>
+								  	<th ng-if="current_user"><span class="grey" ng-if="selection.length">{{selection.length}}</span></th>
+								  	<th></th>
+								  	<th>Title</th>
+								  	<th>Id</th>						    
+								    <th>Created</th>
+								    <th>Updated</th>
+								    <th>Delete</th>
+								    <th>Publish</th>
+								  </tr>
+							  </thead>
+							  <tbody>
+								  <tr ng-repeat="object in temp_objects | orderBy:'updated'">	  
+								    <td ng-if="current_user"><span class="glyphicon glyphicon-flag flag" ng-class="{'flag-selected': selection.indexOf(object.PID) != -1}" data-ng-click="toggleObject(object.PID)"></span></td>
+								  	<td bind-once ><img src="https://<%= $config->{'phaidra-temp'}->{baseurl} %>/preview/{{object.PID}}///60" class="img-thumbnail" width="60" height="60" title="{{object['uw.general.title']}}" alt="{{object['uw.general.title']}}"></td>
+								  	<td bind-once ><h2 class="title">{{object['uw.general.title']}}</h2></td>					  	
+								  	<td><a href="https://<%= $config->{'phaidra-temp'}->{baseurl} %>/{{object.PID}}" title="{{object.PID}}" alt="{{object.PID}}">https://<%= $config->{'phaidra-temp'}->{baseurl} %>/{{object.PID}}</a></td>						  	
+								    <td bind-once ><span class="list-date">{{object['fgs.createdDate'] | date:'dd.MM.yyyy HH:mm:ss'}}</span></td>
+								    <td bind-once ><span class="list-date">{{object['fgs.lastModifiedDate'] | date:'dd.MM.yyyy HH:mm:ss'}}</span></td>
+								    <td bind-once ><a href="#" ng-click="deleteObject()"><i class="fi-trash icon-larger"></i></a></td>
+								  	<td bind-once >
+								  		<div ng-switch on="object['fgs.contentModel']">
+								  			<div ng-switch-when="cmodel:Collection">
+								  				
+								  			</div>
+								  			<div ng-switch-default>
+								  				<a href="#" ng-click="pushObject()"><i class="fi-arrow-right icon-larger"></i></a>
+								  			</div>
+								  		</div>
+								  	</td>
+								  </tr>
+							  </tbody>
+						</table>
+					
+				</div>
+		    </tab>
+		    
+		    <tab>
+		    	<tab-heading><h2>Phaidra objects</h2></tab-heading>
+		    	<div class="content">
+			    	
+						<table class="table">
+							  <thead>
+								  <tr>
+								  	<th ng-if="current_user"><span class="grey" ng-if="selection.length">{{selection.length}}</span></th>
+								  	<th></th>
+								  	<th>Title</th>
+								  	<th>Id</th>						    
+								    <th>Created</th>
+								    <th>Updated</th>
+								  </tr>
+							  </thead>
+							  <tbody>
+								  <tr ng-repeat="object in prod_objects | orderBy:'updated'">	  
+								    <td ng-if="current_user"><span class="glyphicon glyphicon-flag flag" ng-class="{'flag-selected': selection.indexOf(object.PID) != -1}" data-ng-click="toggleObject(object.PID)"></span></td>
+								  	<td bind-once ><img src="https://<%= $config->{'phaidra'}->{baseurl} %>/preview/{{object.PID}}///60" class="img-thumbnail" width="60" height="60" title="{{object['uw.general.title']}}" alt="{{object['uw.general.title']}}"></td>
+								  	<td bind-once ><h2 class="title">{{object['uw.general.title']}}</h2></td>					  	
+								  	<td><a href="https://<%= $config->{'phaidra'}->{baseurl} %>/{{object.PID}}" title="{{object.PID}}" alt="{{object.PID}}">https://<%= $config->{'phaidra'}->{baseurl} %>/{{object.PID}}</a></td>						  	
+								    <td bind-once ><span class="list-date">{{object['fgs.createdDate'] | date:'dd.MM.yyyy HH:mm:ss'}}</span></td>
+								    <td bind-once ><span class="list-date">{{object['fgs.lastModifiedDate'] | date:'dd.MM.yyyy HH:mm:ss'}}</span></td>								    
+								  </tr>
+							  </tbody>
+						</table>
+					
+				</div>
+		    </tab>
+		</tabset>
 	</div>
+</center>

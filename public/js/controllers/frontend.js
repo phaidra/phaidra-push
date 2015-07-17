@@ -14,11 +14,17 @@ app.controller('FrontendCtrl', function($scope, $window, $modal, $log, FrontendS
   $scope.temp_objects = [];
   $scope.prod_objects = [];
 
+  $scope.selection = [];  
+
   $scope.init = function (initdata) {
+
+    $scope.baseurl = $('head base').attr('href');
+
     $scope.initdata = angular.fromJson(initdata);
     $scope.current_user = $scope.initdata.current_user;
-    $scope.baseurl = $('head base').attr('href');
-    if($scope.initdata.load_bags){
+    if(!($scope.current_user)){
+      $scope.signin_open();
+    }else{
       $scope.getObjects(true);
       $scope.getObjects(false);
     }
@@ -28,15 +34,11 @@ app.controller('FrontendCtrl', function($scope, $window, $modal, $log, FrontendS
     $scope.alerts.splice(index, 1);
   };
 
-
-
   $scope.signin_open = function () {
-
-      var modalInstance = $modal.open({
-            templateUrl: $('head base').attr('href')+'views/modals/loginform.html',
-            controller: SigninModalCtrl
-      });
-
+    var modalInstance = $modal.open({
+      templateUrl: $('head base').attr('href')+'views/modals/loginform.html',
+      controller: SigninModalCtrl
+    });
   };
 
   $scope.selectAll = function () {
@@ -51,34 +53,34 @@ app.controller('FrontendCtrl', function($scope, $window, $modal, $log, FrontendS
     }
   }
 
-    $scope.getObjects = function(temp){
-        var promise = FrontendService.getObjects(temp);
-        $scope.loadingTracker.addPromise(promise);
-        promise.then(
-          function(response) {
-            $scope.form_disabled = false;
+  $scope.getObjects = function(temp){
+    var promise = FrontendService.getObjects(temp);
+    $scope.loadingTracker.addPromise(promise);
+    promise.then(
+      function(response) {
+        $scope.form_disabled = false;
+        $scope.alerts = response.data.alerts;
+        if(temp){
+          $scope.temp_objects = response.data.objects;
+        }else{
+          $scope.prod_objects = response.data.objects;
+        }
+      }
+      ,function(response) {
+        $scope.form_disabled = false;
+        if(response.data){
+          if(response.data.alerts){
             $scope.alerts = response.data.alerts;
-            if(temp){
-              $scope.temp_objects = response.data.objects;
-            }else{
-              $scope.prod_objects = response.data.objects;
-            }
           }
-          ,function(response) {
-            $scope.form_disabled = false;
-            if(response.data){
-              if(response.data.alerts){
-                $scope.alerts = response.data.alerts;
-              }
-            }
-          }
-        );
-    };
+        }
+      }
+    );
+  };
 
 
-    $scope.setLang = function(langKey) {
-      $translate.use(langKey);
-    };
+  $scope.setLang = function(langKey) {
+    $translate.use(langKey);
+  };
 
 });
 

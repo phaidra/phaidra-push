@@ -66,22 +66,24 @@
   </ul>
 
   <section class="top-bar-section">
+    
     <ul class="menu">
-    
-      <% if(is_user_authenticated){ %>
-        <li ><a href="#">Signed in as <%= current_user->{firstname} %> <%= current_user->{lastname} %></a></li>
-      <% } %>
-    
-      
+
+      <!--
       <li>
-        <% if (is_user_authenticated) { %>
-            <a href="/signout" id="signout" ng-click="sign_out()">Sign out</a>
-        <% }else{ %>
-            <a id="signin" data-redirect="<%= flash 'redirect_to' %>" data-open="<%= flash 'opensignin' %>" ng-click="signin_open()"><i class="fi-lock"></i></a>
+        <% if (!is_user_authenticated) { %>
+            <a id="signin" ng-click="signin_open()"><i class="fi-lock"></i></a>
         <% } %>
       </li>     
-    </ul>
+      -->
 
+    </ul>
+    <% if (is_user_authenticated) { %>
+      <h1 class="username right">        
+        <a class="active"><%= current_user->{firstname} %> <%= current_user->{lastname} %></a>        
+      </h1>
+      <a href="/signout" id="logout-button" class="button secondary icon icon-logout icon-large" ng-click="sign_out()" ></a>
+    <% } %>
   </section>
 </nav>
 
@@ -91,5 +93,15 @@
     <%# ############################ %>
 
 
+  <footer class="footer row">
+    <div class="medium-12 columns">
+      <div class="left"><a href="#" data-page="page-help">Help</a></div>
+      <div class="right">
+        <a href="#" class="link link-first" data-page="page-contact">Contact</a>
+        <a href="#" class="link link-first" data-page="page-imprint">Impressum</a>
+        <a href="http://univie.ac.at" target="_blank" class="link link-last"><img src="/img/uni_logo_farbe_02_small.png" height="20"></a>
+      </div>
+    </div>
+  </footer>  
   </body>
 </html>

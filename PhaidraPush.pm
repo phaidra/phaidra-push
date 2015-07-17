@@ -35,8 +35,47 @@ sub startup {
     load_user => sub {
       my $self = shift;
       my $username  = shift;
-      $self->app->log->info("Loading user: ".$username);
-      return { firstname => "superfake", lastname => "data" };
+
+      my $ldkey = 'logindata_'.$username;
+      my $login_data = $self->app->chi->get($ldkey);
+
+      unless($login_data){
+
+        my $login_data;
+        $self->app->log->debug("[cache miss] $username");
+
+        my $url = Mojo::URL->new;
+        $url->scheme('https');    
+        $url->userinfo($self->app->config->{directory_user}->{username}.":".$self->app->config->{directory_user}->{password});
+        my @base = split('/',$self->app->config->{phaidra}->{apibaseurl});
+        $url->host($base[0]);
+        $url->path($base[1]."/directory/user/$username/data") if exists($base[1]); 
+        my $tx = $self->ua->get($url); 
+        if (my $res = $tx->success) {
+          $login_data =  $tx->res->json->{user_data};        
+          $self->app->log->info("Loaded user: ".$self->app->dumper($login_data));
+          $self->app->chi->set($ldkey, $login_data, '1 day');
+          # keep this here, the set method may change the structure a bit so we better read it again
+          $login_data = $self->app->chi->get($ldkey);        
+        }else {
+            
+          my ($err, $code) = $tx->error;
+          $code = 'Not defined code!' if not defined $code;
+          $self->app->log->info("Loading logig data failed for user $username. Error code: $code, Error: $err");
+          if($tx->res->json && exists($tx->res->json->{alerts})){   
+            $self->stash({phaidra_auth_result => { alerts => $tx->res->json->{alerts}, status  =>  $code ? $code : 500 }});             
+          }else{
+            $self->stash({phaidra_auth_result => { alerts => [{ type => 'danger', msg => $err }], status  =>  $code ? $code : 500 }});
+          }
+            
+          return undef;
+        }  
+
+      }else{
+          $self->app->log->debug("[cache hit] $username");
+      }
+             
+      return $login_data;
     },
     validate_user => sub {
       my ($self, $username, $password, $extradata) = @_;
@@ -192,14 +231,13 @@ sub startup {
     my $r = $self->routes;
     $r->namespaces(['PhaidraPush::Controller']);
 
-    $r->route('') 			  	  ->via('get')   ->to('mama#home');
+    $r->route('')             ->via('get')   ->to('mama#home');
     $r->route('signin') 			->via('get')   ->to('authentication#signin');
     $r->route('signout') 			->via('get')   ->to('authentication#signout');
 
     # if not authenticated, users will be redirected to login page
     my $auth = $r->under('/')->to('authentication#check');
-
-    $auth->route('objects')   ->via('get')   ->to('mama#home');
+    $auth->route('objects')   ->via('get')   ->to('proxy#search_owner');
 
     return $self;
 }
