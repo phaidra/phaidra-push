@@ -1,6 +1,5 @@
-% use Data::Dumper;
-
-<!DOCTYPE html>
+<!doctype html>
+<html data-ng-app="frontendApp">
 
   <head>
 
@@ -12,7 +11,8 @@
     <% }else{ %>
         <base href="<%= url_for->path('/')->to_abs %>">
     <% } %>
-    <title><%= $title %></title>
+
+    <title>Phaidra Push</title>
 
     <link rel="ICON" href="<%= url_for '/img/favicon.ico' %>" type="image/x-icon" />
 
@@ -24,6 +24,7 @@
 
     <!-- AngularJS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-route.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-animate.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-sanitize.js"></script>
 
@@ -33,15 +34,15 @@
     <link href="<%= url_for '/css/foundation-icons.css' %>" rel="stylesheet">
 
     <!-- Angular-Foundation -->
-    <script type="text/javascript" src="<%= url_for '/js/mm-foundation-tpls-0.6.0.min.js' %>"></script>    
+    <script src="<%= url_for '/js/mm-foundation-tpls-0.6.0.min.js' %>"></script>    
 
     <!-- Promise tracker -->
     <script src="<%= url_for '/js/promise-tracker.min.js' %>"></script>
 
     <!-- Custom Phaidra scripts -->
-    <script type="text/javascript" src="<%= url_for '/js/controllers/frontend.js' %>"></script>
-    <script type="text/javascript" src="<%= url_for '/js/services/frontend.js' %>"></script>
-    <script type="text/javascript" src="<%= url_for '/js/services/base64.js' %>"></script>
+    <script src="<%= url_for '/js/controllers/frontend.js' %>"></script>
+    <script src="<%= url_for '/js/services/frontend.js' %>"></script>
+    <script src="<%= url_for '/js/services/base64.js' %>"></script>
 
     <!-- Custom Phaidra CSS -->
     <link href="<%= url_for '/css/phaidraplus.css' %>" rel="stylesheet">
@@ -50,10 +51,18 @@
     <!-- Bindonce -->
     <script src="<%= url_for '/js/bindonce.min.js' %>"></script>
 
-    <%= content_for 'header' %>
   </head>
-  <body data-ng-app="frontendApp" data-ng-controller="FrontendCtrl" data-ng-init="init('<%= $init_data %>')">
+  <body>
 
+<script>
+  angular.module('dataService', ['Base64']).factory('DataService', function($http, Base64) { 
+    return { 
+      getInitData: function() { 
+        return <%== $init_data %> ; 
+      },
+    } 
+  });
+</script>
 
 <nav class="top-bar" data-topbar role="navigation">
   <ul class="title-area">
@@ -88,9 +97,9 @@
 </nav>
 
 
-    <%# ######### Content ########## %>
-    <%= content %>
-    <%# ############################ %>
+<div ng-view>
+
+</div>
 
 
   <footer class="footer row">

@@ -231,13 +231,15 @@ sub startup {
     my $r = $self->routes;
     $r->namespaces(['PhaidraPush::Controller']);
 
-    $r->route('')             ->via('get')   ->to('mama#home');
+    $r->route('')             ->via('get')   ->to('main#home');
     $r->route('signin') 			->via('get')   ->to('authentication#signin');
     $r->route('signout') 			->via('get')   ->to('authentication#signout');
 
     # if not authenticated, users will be redirected to login page
     my $auth = $r->under('/')->to('authentication#check');
     $auth->route('objects')   ->via('get')   ->to('proxy#search_owner');
+    #$auth->route('delete/:pid')   ->via('get')   ->to('main#delete');
+    #$auth->route('push/:pid')   ->via('get')   ->to('main#push');
 
     return $self;
 }

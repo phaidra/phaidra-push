@@ -1,10 +1,47 @@
-var app = angular.module('frontendApp', ['ngAnimate', 'ngSanitize', 'mm.foundation', 'ajoslin.promise-tracker', 'pasvaz.bindonce', 'frontendService']);
+var app = angular.module('frontendApp', ['ngRoute', 'actionControllers' ,'ngAnimate', 'ngSanitize', 'mm.foundation', 'ajoslin.promise-tracker', 'pasvaz.bindonce', 'frontendService', 'dataService']);
 
+app.config(['$routeProvider',
+  function($routeProvider) {
+    $routeProvider.
+      when('/delete/:pid', {
+        templateUrl: 'partials/delete.html',
+        controller: 'DeleteCtrl'
+      }).
+      when('/push/:pid', {
+        templateUrl: 'partials/push.html',
+        controller: 'PushCtrl'
+      }).
+      otherwise({              
+        templateUrl: 'partials/list.html',
+        controller: 'ListCtrl'
+      });
+  }]
+);
 
-app.controller('FrontendCtrl', function($scope, $window, $modal, $log, FrontendService, promiseTracker) {
+var actionControllers = angular.module('actionControllers', []);
+
+actionControllers.controller('DeleteCtrl', ['$scope', '$routeParams', function($scope, $routeParams, FrontendService) {
+
+    $scope.pid = $routeParams.pid;
+
+    $scope.agreed = false;
+  
+    $scope.startDelete = function () {
+      alert('huda');
+    };
+
+}]);
+
+actionControllers.controller('PushCtrl', ['$scope', '$routeParams',
+  function($scope, $routeParams) {
+    $scope.pid = $routeParams.pid;
+  }]
+);
+
+actionControllers.controller('ListCtrl', function($scope, $window, $modal, $log, FrontendService, DataService, promiseTracker) {
 
   // we will use this to track running ajax requests to show spinner
-  $scope.loadingTracker = promiseTracker.register('loadingTrackerFrontend');
+  //$scope.loadingTracker = promiseTracker.register('loadingTrackerFrontend');
 
   $scope.alerts = [];
 
@@ -16,12 +53,14 @@ app.controller('FrontendCtrl', function($scope, $window, $modal, $log, FrontendS
 
   $scope.selection = [];  
 
-  $scope.init = function (initdata) {
+  $scope.init = function () {
 
     $scope.baseurl = $('head base').attr('href');
-
-    $scope.initdata = angular.fromJson(initdata);
+    var initdata = DataService.getInitData();
+    $scope.initdata = angular.fromJson(initdata);    
     $scope.current_user = $scope.initdata.current_user;
+    $scope.phaidratemp_baseurl = $scope.initdata.phaidratemp_baseurl;
+    $scope.phaidra_baseurl = $scope.initdata.phaidra_baseurl;
     if(!($scope.current_user)){
       $scope.signin_open();
     }else{
@@ -36,7 +75,7 @@ app.controller('FrontendCtrl', function($scope, $window, $modal, $log, FrontendS
 
   $scope.signin_open = function () {
     var modalInstance = $modal.open({
-      templateUrl: $('head base').attr('href')+'views/modals/loginform.html',
+      templateUrl: $('head base').attr('href')+'partials/modals/loginform.html',
       controller: SigninModalCtrl
     });
   };
@@ -55,7 +94,7 @@ app.controller('FrontendCtrl', function($scope, $window, $modal, $log, FrontendS
 
   $scope.getObjects = function(temp){
     var promise = FrontendService.getObjects(temp);
-    $scope.loadingTracker.addPromise(promise);
+    //$scope.loadingTracker.addPromise(promise);
     promise.then(
       function(response) {
         $scope.form_disabled = false;
@@ -92,7 +131,7 @@ var SigninModalCtrl = function ($scope, $modalInstance, FrontendService, promise
   $scope.baseurl = $('head base').attr('href');
 
   // we will use this to track running ajax requests to show spinner
-  $scope.loadingTracker = promiseTracker('loadingTrackerFrontend');
+  //$scope.loadingTracker = promiseTracker('loadingTrackerFrontend');
 
   $scope.closeAlert = function(index) {
       $scope.alerts.splice(index, 1);
@@ -111,7 +150,7 @@ var SigninModalCtrl = function ($scope, $modalInstance, FrontendService, promise
     $scope.form_disabled = true;
 
     var promise = FrontendService.signin($scope.user.username, $scope.user.password);
-      $scope.loadingTracker.addPromise(promise);
+      //$scope.loadingTracker.addPromise(promise);
       promise.then(
         function(response) {
           $scope.form_disabled = false;

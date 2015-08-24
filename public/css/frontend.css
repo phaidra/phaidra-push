@@ -123,3 +123,11 @@ table thead tr th, table thead tr td, table tfoot tr th, table tfoot tr td {
 table thead, table tfoot {
   background: none;
 }
+
+.footer-margin {
+  margin-bottom: 50px;
+}
+
+label {
+  color: #dbd9d5;
+}
