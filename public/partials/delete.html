@@ -1,4 +1,4 @@
-<div class="row footer-margin">
+<div class="row footer-margin content-margin" ng-hide="success">
   <div class="small-8 medium-6 large-6 small-centered columns">
 
     <h1>Delete object {{pid}}</h1>
@@ -17,12 +17,26 @@
 
     <form>
       <div class="row">
+      <div class="large-4 columns left">      
+          <a href="#">Back</a>
+      </div>
         <div class="large-4 columns right">      
           <input id="checkbox1" type="checkbox" ng-model="agreed"><label for="checkbox1">I agree</label>          
           <button ng-disabled="!agreed" ng-click="startDelete()">Delete</button>
         </div>
       </div>
     </form>
+
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">Error deleting object {{pid}}: {{alert.msg}}</alert>
+
+  </div>
+</div>
+
+<div class="row footer-margin content-margin" ng-show="success">
+  <div class="small-8 medium-6 large-6 small-centered columns">
+
+    <h1>Object {{pid}} was successfuly deleted.</h1>
+    <p><a href="#">Back to my objects</a></p>
 
   </div>
 </div>

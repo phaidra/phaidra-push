@@ -1,5 +1,46 @@
 var app = angular.module('frontendApp', ['ngRoute', 'actionControllers' ,'ngAnimate', 'ngSanitize', 'mm.foundation', 'ajoslin.promise-tracker', 'pasvaz.bindonce', 'frontendService', 'dataService']);
 
+app.factory('pT', function (promiseTracker) {
+  return promiseTracker();
+});
+
+app.run(function($rootScope, pT) {
+    $rootScope.spinnerOpts = {
+      lines: 8 // The number of lines to draw
+    , length: 0 // The length of each line
+    , width: 14 // The line thickness
+    , radius: 15 // The radius of the inner circle
+    , scale: 0.75 // Scales overall size of the spinner
+    , corners: 1 // Corner roundness (0..1)
+    , color: '#fff' // #rgb or #rrggbb or array of colors
+    , opacity: 0 // Opacity of the lines
+    , rotate: 0 // The rotation offset
+    , direction: 1 // 1: clockwise, -1: counterclockwise
+    , speed: 1 // Rounds per second
+    , trail: 42 // Afterglow percentage
+    , fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+    , zIndex: 2e9 // The z-index (defaults to 2000000000)    
+    , top: '50%' // Top position relative to parent
+    , left: '50%' // Left position relative to parent
+    , shadow: false // Whether to render a shadow
+    , hwaccel: true // Whether to use hardware acceleration
+    , position: 'relative' // Element positioning
+  }
+
+  $rootScope.spinner = new Spinner($rootScope.spinnerOpts);
+
+  // we will use this to track running ajax requests to show spinner
+  //$scope.pt = promiseTracker.register('main');
+  $rootScope.$watch(pT.active, function (isActive) {
+    if(isActive){
+      $rootScope.spinner.spin(jQuery('#spin').get(0));
+    }else{
+      $rootScope.spinner.stop();
+    }
+  });
+
+})
+
 app.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
@@ -20,17 +61,37 @@ app.config(['$routeProvider',
 
 var actionControllers = angular.module('actionControllers', []);
 
-actionControllers.controller('DeleteCtrl', ['$scope', '$routeParams', function($scope, $routeParams, FrontendService) {
+actionControllers.controller('DeleteCtrl', function($scope, $routeParams, FrontendService, pT) {
 
     $scope.pid = $routeParams.pid;
-
     $scope.agreed = false;
+    $scope.alerts = [];
+    $scope.success = false;
+
+    $scope.closeAlert = function(index) {
+      $scope.alerts.splice(index, 1);
+    };
   
     $scope.startDelete = function () {
-      alert('huda');
+    
+      var promise = FrontendService.deleteObject($scope.pid);
+      pT.addPromise(promise);
+      promise.then(
+        function(response) {
+          //$scope.alerts = response.data.alerts;          
+          $scope.success = true;
+        }
+        ,function(response) {          
+          if(response.data){
+            if(response.data.alerts){
+              $scope.alerts = response.data.alerts;
+            }
+          }
+        }
+      );
     };
 
-}]);
+});
 
 actionControllers.controller('PushCtrl', ['$scope', '$routeParams',
   function($scope, $routeParams) {
@@ -38,11 +99,8 @@ actionControllers.controller('PushCtrl', ['$scope', '$routeParams',
   }]
 );
 
-actionControllers.controller('ListCtrl', function($scope, $window, $modal, $log, FrontendService, DataService, promiseTracker) {
-
-  // we will use this to track running ajax requests to show spinner
-  //$scope.loadingTracker = promiseTracker.register('loadingTrackerFrontend');
-
+actionControllers.controller('ListCtrl', function($rootScope, $scope, $window, $modal, $log, FrontendService, DataService, pT) {
+  
   $scope.alerts = [];
 
   $scope.initdata = '';
@@ -94,10 +152,9 @@ actionControllers.controller('ListCtrl', function($scope, $window, $modal, $log,
 
   $scope.getObjects = function(temp){
     var promise = FrontendService.getObjects(temp);
-    //$scope.loadingTracker.addPromise(promise);
+    pT.addPromise(promise);
     promise.then(
       function(response) {
-        $scope.form_disabled = false;
         $scope.alerts = response.data.alerts;
         if(temp){
           $scope.temp_objects = response.data.objects;
@@ -106,7 +163,6 @@ actionControllers.controller('ListCtrl', function($scope, $window, $modal, $log,
         }
       }
       ,function(response) {
-        $scope.form_disabled = false;
         if(response.data){
           if(response.data.alerts){
             $scope.alerts = response.data.alerts;
@@ -153,7 +209,6 @@ var SigninModalCtrl = function ($scope, $modalInstance, FrontendService, promise
       //$scope.loadingTracker.addPromise(promise);
       promise.then(
         function(response) {
-          $scope.form_disabled = false;
           $scope.alerts = response.data.alerts;
           $modalInstance.close();
           var red = $('#signin').attr('data-redirect');
@@ -164,7 +219,6 @@ var SigninModalCtrl = function ($scope, $modalInstance, FrontendService, promise
           }
         }
         ,function(response) {
-          $scope.form_disabled = false;
           $scope.alerts = response.data.alerts;
             }
         );

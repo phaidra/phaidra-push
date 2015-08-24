@@ -238,7 +238,7 @@ sub startup {
     # if not authenticated, users will be redirected to login page
     my $auth = $r->under('/')->to('authentication#check');
     $auth->route('objects')   ->via('get')   ->to('proxy#search_owner');
-    #$auth->route('delete/:pid')   ->via('get')   ->to('main#delete');
+    $auth->route('delete/:pid')   ->via('get')   ->to('proxy#delete_object');
     #$auth->route('push/:pid')   ->via('get')   ->to('main#push');
 
     return $self;

@@ -7,17 +7,25 @@ angular.module('frontendService', ['Base64'])
 
          return $http({
              method  : 'GET',
-             url     : $('head base').attr('href')+'signin',
+             url     : $('head base').attr('href') + 'signin',
              headers: {'Authorization': 'Basic ' + Base64.encode(username + ':' + password)}
          });
     },
-   
+
     getObjects: function(temp) {
 
          return $http({
              method  : 'GET',
-             url     : $('head base').attr('href')+'objects',
+             url     : $('head base').attr('href') + 'objects',            
              params  : { temp: temp ? 1 : 0 }
+         });
+    },
+
+    deleteObject: function(pid) {
+
+         return $http({
+             method  : 'GET',
+             url     : $('head base').attr('href') + 'delete/' + pid
          });
     },
 

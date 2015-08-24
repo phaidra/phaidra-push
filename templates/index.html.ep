@@ -16,39 +16,38 @@
 
     <link rel="ICON" href="<%= url_for '/img/favicon.ico' %>" type="image/x-icon" />
 
-    <!-- Modernizr -->
+    <%# Modernizr %>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.js"></script>
 
-    <!-- jQuery -->
+    <%# jQuery %>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
-    <!-- AngularJS -->
+    <%# AngularJS %>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-route.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-animate.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-sanitize.js"></script>
 
-    <!-- Foundation -->
-    <!--<link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.2/css/foundation.min.css" rel="stylesheet">-->
+    <%#  Foundation %>
+    <%# <link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.2/css/foundation.min.css" rel="stylesheet"> %>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.2/css/normalize.min.css" rel="stylesheet">
     <link href="<%= url_for '/css/foundation-icons.css' %>" rel="stylesheet">
 
-    <!-- Angular-Foundation -->
+    <%# Angular-Foundation %>
     <script src="<%= url_for '/js/mm-foundation-tpls-0.6.0.min.js' %>"></script>    
+    <script src="<%= url_for '/js/promise-tracker-2.1.0.js' %>"></script>
+    <script src="<%= url_for '/js/spinjs-2.3.2.min.js' %>"></script>
 
-    <!-- Promise tracker -->
-    <script src="<%= url_for '/js/promise-tracker.min.js' %>"></script>
-
-    <!-- Custom Phaidra scripts -->
+    <%# Custom Phaidra scripts %>
     <script src="<%= url_for '/js/controllers/frontend.js' %>"></script>
     <script src="<%= url_for '/js/services/frontend.js' %>"></script>
     <script src="<%= url_for '/js/services/base64.js' %>"></script>
 
-    <!-- Custom Phaidra CSS -->
+    <%# Custom Phaidra CSS %>
     <link href="<%= url_for '/css/phaidraplus.css' %>" rel="stylesheet">
     <link href="<%= url_for '/css/frontend.css' %>" rel="stylesheet">
 
-    <!-- Bindonce -->
+    <%# Bindonce %>
     <script src="<%= url_for '/js/bindonce.min.js' %>"></script>
 
   </head>
@@ -71,7 +70,7 @@
         <!--<img class="phaidra-logo" src="/img/phaidra_shadow_small.png" height="35">-->
         <a href="./" class="logo">Phaidra Push</a>
       </h1>
-    </li>
+    </li>    
   </ul>
 
   <section class="top-bar-section">
@@ -86,6 +85,10 @@
       </li>     
       -->
 
+      <li>
+        <div id="spin"></div>
+      </li>     
+
     </ul>
     <% if (is_user_authenticated) { %>
       <h1 class="username right">        
@@ -96,11 +99,7 @@
   </section>
 </nav>
 
-
-<div ng-view>
-
-</div>
-
+  <div ng-view class="fade"></div>
 
   <footer class="footer row">
     <div class="medium-12 columns">

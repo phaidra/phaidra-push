@@ -131,3 +131,52 @@ table thead, table tfoot {
 label {
   color: #dbd9d5;
 }
+
+#spin {
+  position: relative;
+  margin-left: 10px;
+  width: 45px;
+  height: 45px;
+}
+
+.alert-box.danger  {
+    background-color: #e82652;
+    border-color: #d21642;
+    color: #ffffff;
+}
+
+.alert-box .close  {
+    cursor: pointer;
+}
+
+.ng-hide-add, .ng-hide-remove {
+    display: block !important; 
+}
+
+.fade {  
+    position: absolute;
+    opacity: 1;
+    width: 100%;
+}
+
+.fade.ng-enter,
+.fade.ng-leave {
+    -webkit-transition: all 0.2s ease;
+    transition: all 0.2s ease;
+}
+.fade.ng-enter {
+    opacity: 0;
+}
+.fade.ng-enter-active {
+    opacity: 1;
+}
+.fade.ng-leave {
+    opacity: 1;
+}
+.fade.ng-leave-active {
+    opacity: 0;
+}
+
+.content-margin {
+  margin-top: 2rem;
+}

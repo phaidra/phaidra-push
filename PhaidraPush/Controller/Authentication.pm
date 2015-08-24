@@ -49,7 +49,7 @@ sub signin {
 
 		my $res = $self->stash('phaidra_auth_result');
 		# set token cookie, we are currently not using this, but if js would like to access api directly it needs the token
-		$self->cookie($self->app->config->{authentication}->{token_cookie} => $res->{token});
+		# $self->cookie($self->app->config->{authentication}->{token_cookie} => $res->{token});
 
 		$self->app->log->info("Current user: ".$self->app->dumper($self->current_user));
 		$self->render(json => { alerts => $res->{alerts}} , status => $res->{status});

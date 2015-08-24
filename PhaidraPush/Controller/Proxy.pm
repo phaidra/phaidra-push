@@ -18,8 +18,6 @@ sub search_owner {
 	$url->scheme('https');		
 	my @base = split('/', $temp ? $self->app->config->{'phaidra-temp'}->{apibaseurl} : $self->app->config->{phaidra}->{apibaseurl});
 
-$self->app->log->debug("XXXXXXXXXXXXXX $temp". $self->app->dumper(@base) );
-
 	$url->host($base[0]);
 	if(exists($base[1])){
 		$url->path($base[1]."/search/owner/$username");
@@ -42,9 +40,47 @@ $self->app->log->debug("XXXXXXXXXXXXXX $temp". $self->app->dumper(@base) );
 	}
     $url->query(\%params);
 	
-	my $token = $self->load_token;
+	my $temp_token = $self->load_token;
 	
-  	$self->ua->get($url => {$self->app->config->{authentication}->{token_header} => $token} => sub { 	
+  	$self->ua->get($url => sub { 	
+  		my ($ua, $tx) = @_;
+
+	  	if (my $res = $tx->success) {
+	  		$self->render(json => $res->json, status => 200 );
+	  	}else {
+		 	my ($err, $code) = $tx->error;
+		 	if($tx->res->json){	  
+			  	if(exists($tx->res->json->{alerts})) {
+				 	$self->render(json => { alerts => $tx->res->json->{alerts} }, status =>  $code ? $code : 500);
+				 }else{
+				  	$self->render(json => { alerts => [{ type => 'danger', msg => $err }] }, status =>  $code ? $code : 500);
+				  	
+				 }
+		 	}
+		}
+		
+  	});	
+    
+}
+
+sub delete_object {
+    my $self = shift;  	 
+    my $pid = $self->stash('pid');
+
+    my $url = Mojo::URL->new;
+	$url->scheme('https');		
+	my @base = split('/', $self->app->config->{'phaidra-temp'}->{apibaseurl});
+
+	$url->host($base[0]);
+	if(exists($base[1])){
+		$url->path($base[1]."/object/$pid");
+	}else{
+		$url->path("/object/$pid");
+	}		    
+	
+	my $temp_token = $self->load_token;
+	
+  	$self->ua->delete($url => {$self->app->config->{authentication}->{token_header} => $temp_token} => sub { 	
   		my ($ua, $tx) = @_;
 
 	  	if (my $res = $tx->success) {

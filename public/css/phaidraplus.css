@@ -6816,9 +6816,6 @@ div.smallpill  {
 .standalone .top-bar , .standalone .sidebar , .standalone #uncategorised-objs  {
     display: none !important;
 }
-.cropit-image-preview.cropit-image-loading .spinner  {
-    opacity: 1;
-}
 .cropit-image-preview.cropit-image-loaded  {
     cursor: move;
 }
@@ -7624,12 +7621,6 @@ html.semanticView #sidebar-toggle  {
 }
 #maincontainer ul , #maincontainer h2 , #maincontainer h1  {
     margin-bottom: 1em;
-}
-.spinner  {
-    position: fixed;
-    left: 50%;
-    top: 40%;
-    margin-left: -12px;
 }
 .semanticView #options , .semanticView .gridoptions , .semanticView .floatblock.display , .semanticView .gridoptions.displays  {
     display: none;
