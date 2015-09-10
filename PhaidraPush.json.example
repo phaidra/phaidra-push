@@ -18,7 +18,6 @@
         "password": "pass"
     },
 
-
     "phaidra-temp": {
         "baseurl": "phaidra-temp.univie.ac.at",
         "apibaseurl": "services.phaidra-temp.univie.ac.at/api/"

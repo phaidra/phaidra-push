@@ -23,7 +23,7 @@ sub home {
   my $init_data = { 
     current_user => $self->current_user,
     phaidratemp_baseurl => $self->app->config->{'phaidra-temp'}->{baseurl},
-    phaidra_baseurl => $self->app->config->{phaidra}->{baseurl}
+    phaidra_baseurl => $self->app->config->{'phaidra'}->{baseurl}
   };
   $self->stash(init_data => encode_json($init_data));
   $self->stash(init_data_perl => $init_data);

@@ -7,16 +7,16 @@ use base 'Mojolicious::Controller';
 use Mojo::JSON qw(encode_json decode_json);
 
 
-sub search_owner {
+sub search {
     my $self = shift;  	 
     
     my $username = $self->current_user->{username};
 
-    my $temp = $self->param('temp');
+    my $instance = $self->param('instance');
     
     my $url = Mojo::URL->new;
 	$url->scheme('https');		
-	my @base = split('/', $temp ? $self->app->config->{'phaidra-temp'}->{apibaseurl} : $self->app->config->{phaidra}->{apibaseurl});
+	my @base = split('/', $self->app->config->{$instance}->{apibaseurl});
 
 	$url->host($base[0]);
 	if(exists($base[1])){
@@ -26,6 +26,9 @@ sub search_owner {
 	}
 		    
 	my %params;
+	if(defined($self->param('q'))){
+		$params{q} = $self->param('q');
+	}
 	if(defined($self->param('from'))){
 		$params{from} = $self->param('from');
 	}
@@ -37,6 +40,10 @@ sub search_owner {
 	}
 	if(defined($self->param('reverse'))){
 		$params{'reverse'} = $self->param('reverse');
+	}
+	if(defined($self->param('fields'))){	
+		my @fields = $self->param('fields');	
+		$params{'fields'} = \@fields;
 	}
     $url->query(\%params);
 	
@@ -79,8 +86,8 @@ sub delete_object {
 	}		    
 	
 	my $temp_token = $self->load_token;
-	
-  	$self->ua->delete($url => {$self->app->config->{authentication}->{token_header} => $temp_token} => sub { 	
+	$self->app->log->debug('using token: '.$temp_token);
+  	$self->ua->delete($url => {$self->app->config->{authentication}->{phaidra_api_token_header} => $temp_token} => sub { 	
   		my ($ua, $tx) = @_;
 
 	  	if (my $res = $tx->success) {

@@ -47,7 +47,7 @@ sub startup {
         my $url = Mojo::URL->new;
         $url->scheme('https');    
         $url->userinfo($self->app->config->{directory_user}->{username}.":".$self->app->config->{directory_user}->{password});
-        my @base = split('/',$self->app->config->{phaidra}->{apibaseurl});
+        my @base = split('/',$self->app->config->{'phaidra-temp'}->{apibaseurl});
         $url->host($base[0]);
         $url->path($base[1]."/directory/user/$username/data") if exists($base[1]); 
         my $tx = $self->ua->get($url); 
@@ -84,7 +84,7 @@ sub startup {
       my $url = Mojo::URL->new;
       $url->scheme('https');    
       $url->userinfo($username.":".$password);
-      my @base = split('/',$self->app->config->{phaidra}->{apibaseurl});
+      my @base = split('/',$self->app->config->{'phaidra-temp'}->{apibaseurl});
       $url->host($base[0]);
       $url->path($base[1]."/signin") if exists($base[1]); 
         my $tx = $self->ua->get($url); 
@@ -237,7 +237,7 @@ sub startup {
 
     # if not authenticated, users will be redirected to login page
     my $auth = $r->under('/')->to('authentication#check');
-    $auth->route('objects')   ->via('get')   ->to('proxy#search_owner');
+    $auth->route('objects')   ->via('get')   ->to('proxy#search');
     $auth->route('delete/:pid')   ->via('get')   ->to('proxy#delete_object');
     #$auth->route('push/:pid')   ->via('get')   ->to('main#push');
 

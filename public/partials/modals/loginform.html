@@ -4,7 +4,7 @@
       <input type="text" name="username" placeholder="username" ng-model="user.username" ng-keyup="hitEnterSignin($event)" required/>
       <input type="password" name="password" placeholder="password" ng-model="user.password" ng-keyup="hitEnterSignin($event)" required>
     <div class="modal-actions">
-      <input type="submit" href="#" id="login-modal-login-btn" class="button light" value="login" ng-click="signin()" ng-disabled="(loginform.$dirty && loginform.$invalid) || loginform.$pristine || form_disabled">
+      <input type="submit" href="#" id="login-modal-login-btn" class="button light" value="login" ng-click="signin()" ng-disabled="(loginform.$dirty && loginform.$invalid) || loginform.$pristine || form_disabled" autofocus>
       <div class="right"><img src="img/uni_logo_farbe_02_small.png" height="30"></div>
     </div>
     </form>

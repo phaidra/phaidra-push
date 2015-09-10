@@ -4,7 +4,7 @@
   <head>
 
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <!--<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />-->
 
     <% if($config->{proxy_path}){ %>
         <base href="<%= url_for->path('/'.$config->{proxy_path})->to_abs.'/' %>">
@@ -43,7 +43,7 @@
     <script src="<%= url_for '/js/services/frontend.js' %>"></script>
     <script src="<%= url_for '/js/services/base64.js' %>"></script>
 
-    <%# Custom Phaidra CSS %>
+    <%# Custom Phaidra CSS %>    
     <link href="<%= url_for '/css/phaidraplus.css' %>" rel="stylesheet">
     <link href="<%= url_for '/css/frontend.css' %>" rel="stylesheet">
 
@@ -57,7 +57,7 @@
   angular.module('dataService', ['Base64']).factory('DataService', function($http, Base64) { 
     return { 
       getInitData: function() { 
-        return <%== $init_data %> ; 
+        return angular.fromJson(<%== $init_data %>) ; 
       },
     } 
   });
@@ -94,7 +94,7 @@
       <h1 class="username right">        
         <a class="active"><%= current_user->{firstname} %> <%= current_user->{lastname} %></a>        
       </h1>
-      <a href="/signout" id="logout-button" class="button secondary icon icon-logout icon-large" ng-click="sign_out()" ></a>
+      <a href="/signout" id="logout-button" class="button secondary fi-unlock" ng-click="sign_out()" ></a>
     <% } %>
   </section>
 </nav>
@@ -106,7 +106,6 @@
       <div class="left"><a href="#" data-page="page-help">Help</a></div>
       <div class="right">
         <a href="#" class="link link-first" data-page="page-contact">Contact</a>
-        <a href="#" class="link link-first" data-page="page-imprint">Impressum</a>
         <a href="http://univie.ac.at" target="_blank" class="link link-last"><img src="/img/uni_logo_farbe_02_small.png" height="20"></a>
       </div>
     </div>

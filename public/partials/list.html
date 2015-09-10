@@ -1,56 +1,100 @@
 
 <div class="row footer-margin" data-ng-init="init()">
   <div class="small-10 medium-8 large-8 small-centered columns">
-	<div>
+	<div data-ng-show="objects['phaidra'].length || objects['phaidra-temp'].length" data-ng-cloak>
 		<tabset>
-		    <tab>
-			    <tab-heading><h2>Phaidra-Temp objects</h2></tab-heading>
+
+		    <tab ng-repeat="instance in ['phaidra-temp','phaidra']">
+			    <tab-heading><h2>{{instance.capitalizeFirstLetter()}} objects</h2></tab-heading>
 			    <div class="content">
 			    	
-						<table class="table">
+					<div class="row">				    	
+						<div class="small-7 columns">
+							<div class="row ">						
+								<div class="small-2 columns pagination-row">
+						        	<center><span>{{paging[instance].totalItems}} hits</span></center>
+						        </div>	
+								<div class="small-10 columns pagination-row pagination-centered">
+						        	<pagination class="pagination-sm" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;" total-items="paging[instance].totalItems" on-select-page="setPage(instance, page)" page="paging[instance].currentPage" items-per-page="paging[instance].limit" max-size="5" boundary-links="true" rotate="false" num-pages="paging[instance].numPages"></pagination>
+					        	</div>										     						        		                                 				    
+							</div>
+						</div>
+						<div class="small-5 columns">
+					    	<form>
+						    	<div class="row">			    	
+							    	<div class="large-12 columns">
+								      <div class="row collapse">
+								        <div class="small-10 columns">
+								          <input ng-keypress="searchHitEnter($event, instance)" type="text" ng-model="paging[instance].query" placeholder="Search your {{instance.capitalizeFirstLetter()}} objects" />
+								        </div>
+								        <div class="small-2 columns">
+								          <a href="#" ng-click="querySearch(instance)" class="button postfix fi-magnifying-glass"></a>
+								        </div>
+								      </div>
+								    </div>			    							    
+						    	</div>
+							</form>
+						</div>
+					</div>
+			    	
+
+					<table class="table objectlist">
 							  <thead>
 								  <tr>
-								  	<th ng-if="current_user"><span class="grey" ng-if="selection.length">{{selection.length}}</span></th>
+								  	<th >								  	
+								  		<span ng-class="{'flag-selection-active': getSelection().length > 0}" class="fi-flag flag-selection" dropdown-toggle="#drop1"></span>	
+									  	<ul id="drop1" class="f-dropdown">									  	
+									  	  <li><a href="#" class="info">{{getSelection().length}} selected</a></li>										  	  	
+										  <li><a href="#" ng-click="resetSelection()">Unselect all</a></li>
+										  <li><a href="#" ng-click="selectAll()">Select all</a></li>
+										  <li><a href="#/delete_selection/">Delete selected...</a></li>
+										  <li><a href="#/publish_selection/">Publish selected...</a></li>
+										</ul>																			  		
+								  	</th>
 								  	<th></th>
-								  	<th>Title</th>
-								  	<th>Id</th>						    
-								    <th>Created</th>
-								    <th>Updated</th>
-								    <th>Delete</th>
-								    <th>Publish</th>
+								  	<th ng-class="{'th-sorted': isSortedBy('uw.general.title.asort,STRING')}"><a href="#" ng-click="setSort(instance, 'uw.general.title.asort,STRING')">Title</a></th>
+								  	<th ng-class="{'th-sorted': isSortedBy('PIDNum,INT')}"><a href="#" ng-click="setSort(instance, 'PIDNum,INT')">Id</a></th>						    
+								    <th ng-class="{'th-sorted': isSortedBy('fgs.createdDate,STRING')}"><a href="#" ng-click="setSort(instance, 'fgs.createdDate,STRING')">Created</a></th>
+								    <th ng-class="{'th-sorted': isSortedBy('fgs.lastModifiedDate,STRING')}"><a href="#" ng-click="setSort(instance, 'fgs.lastModifiedDate,STRING')">Updated</a></th>
+								    <th ng-if="instance == 'phaidra-temp'" class="muted">Delete</th>
+								    <th ng-if="instance == 'phaidra-temp'" class="muted">Publish</th>
 								  </tr>
 							  </thead>
 							  <tbody>
-								  <tr ng-repeat="object in temp_objects | orderBy:'updated'">	  
-								    <td ng-if="current_user"><span class="glyphicon glyphicon-flag flag" ng-class="{'flag-selected': selection.indexOf(object.PID) != -1}" data-ng-click="toggleObject(object.PID)"></span></td>
-								  	<td bind-once ><img src="https://{{phaidratemp_baseurl}}/preview/{{object.PID}}///60" class="img-thumbnail" width="60" height="60" title="{{object['uw.general.title']}}" alt="{{object['uw.general.title']}}"></td>
-								  	<td bind-once ><h2 class="title">{{object['uw.general.title']}}</h2></td>					  	
-								  	<td><a href="https://{{phaidratemp_baseurl}}/{{object.PID}}" title="{{object.PID}}" alt="{{object.PID}}">https://{{phaidratemp_baseurl}}/{{object.PID}}</a></td>						  	
-								    <td bind-once ><span class="list-date">{{object['fgs.createdDate'] | date:'dd.MM.yyyy HH:mm:ss'}}</span></td>
-								    <td bind-once ><span class="list-date">{{object['fgs.lastModifiedDate'] | date:'dd.MM.yyyy HH:mm:ss'}}</span></td>
-								    <td bind-once ><a href="#/delete/{{object.PID}}"><i class="fi-trash icon-larger"></i></a></td>
-								  	<td bind-once >
+								  <tr class="listitem" ng-class="{'listitem-selected': isSelected(object.PID)}" ng-repeat="object in objects[instance] | orderBy:'updated'">	  
+								    <td data-ng-click="toggleSelected(object.PID)"><span class="fi-flag flag" ng-class="{'flag-selected': isSelected(object.PID)}"></span></td>
+								  	<td bind-once ><img src="https://{{baseurls[instance]}}/preview/{{object.PID}}///60" class="img-thumbnail" width="40" height="40" title="{{object['uw.general.title']}}" alt="{{object['uw.general.title']}}"></td>
+								  	<td bind-once ><span class="title">{{object['uw.general.title']}}</span></td>					  	
+								  	<td><a class="permalink" target="_blank" href="https://{{baseurls[instance]}}/{{object.PID}}" title="https://{{baseurls[instance]}}/{{object.PID}}" alt="https://{{baseurls[instance]}}/{{object.PID}}">https://{{baseurls[instance]}}/{{object.PID}}</a></td>						  	
+								    <td bind-once ><span class="list-date">{{object['fgs.createdDate'] | date:'dd.MM.yyyy'}}</span></td>
+								    <td bind-once ><span class="list-date">{{object['fgs.lastModifiedDate'] | date:'dd.MM.yyyy'}}</span></td>
+								    <td ng-if="instance == 'phaidra-temp'" bind-once ><a href="#/delete/{{object.PID}}"><i class="fi-trash"></i></a></td>
+								  	<td ng-if="instance == 'phaidra-temp'" bind-once >
 								  		<div ng-switch on="object['fgs.contentModel']">
 								  			<div ng-switch-when="cmodel:Collection">
 								  				
 								  			</div>
 								  			<div ng-switch-default>
-								  				<a href="#/push/{{object.PID}}"><i class="fi-arrow-right icon-larger"></i></a>
+								  				<a href="#/push/{{object.PID}}"><i class="fi-arrow-right"></i></a>
 								  			</div>
 								  		</div>
 								  	</td>
 								  </tr>
 							  </tbody>
-						</table>
-					
+					</table>
+
 				</div>
+
+				<alert ng-repeat="alert in alerts[instance]" type="alert.type" close="closeAlert($index, instance)">{{alert.msg}}</alert>
 		    </tab>
-		    
-		    <tab>
+
+
+<!--		    
+		    <tab data-ng-show="prod_objects" data-ng-cloak>
 		    	<tab-heading><h2>Phaidra objects</h2></tab-heading>
 		    	<div class="content">
 			    	
-						<table class="table">
+						<table class="table objectlist">
 							  <thead>
 								  <tr>
 								  	<th ng-if="current_user"><span class="grey" ng-if="selection.length">{{selection.length}}</span></th>
@@ -62,19 +106,20 @@
 								  </tr>
 							  </thead>
 							  <tbody>
-								  <tr ng-repeat="object in prod_objects | orderBy:'updated'">	  
+								  <tr class="listitem" ng-repeat="object in prod_objects | orderBy:'updated'">	  
 								    <td ng-if="current_user"><span class="glyphicon glyphicon-flag flag" ng-class="{'flag-selected': selection.indexOf(object.PID) != -1}" data-ng-click="toggleObject(object.PID)"></span></td>
-								  	<td bind-once ><img src="https://{{phaidra_baseurl}}/preview/{{object.PID}}///60" class="img-thumbnail" width="60" height="60" title="{{object['uw.general.title']}}" alt="{{object['uw.general.title']}}"></td>
+								  	<td bind-once ><img src="https://{{phaidra_baseurl}}/preview/{{object.PID}}///60" class="img-thumbnail" width="40" height="40" title="{{object['uw.general.title']}}" alt="{{object['uw.general.title']}}"></td>
 								  	<td bind-once ><h2 class="title">{{object['uw.general.title']}}</h2></td>					  	
-								  	<td><a href="https://{{phaidra_baseurl}}/{{object.PID}}" title="{{object.PID}}" alt="{{object.PID}}">https://{{phaidra_baseurl}}/{{object.PID}}</a></td>						  	
-								    <td bind-once ><span class="list-date">{{object['fgs.createdDate'] | date:'dd.MM.yyyy HH:mm:ss'}}</span></td>
-								    <td bind-once ><span class="list-date">{{object['fgs.lastModifiedDate'] | date:'dd.MM.yyyy HH:mm:ss'}}</span></td>								    
+								  	<td><a class="permalink" href="https://{{phaidra_baseurl}}/{{object.PID}}" title="{{object.PID}}" alt="{{object.PID}}">https://{{phaidra_baseurl}}/{{object.PID}}</a></td>						  	
+								    <td bind-once ><span class="list-date">{{object['fgs.createdDate'] | date:'dd.MM.yyyy'}}</span></td>
+								    <td bind-once ><span class="list-date">{{object['fgs.lastModifiedDate'] | date:'dd.MM.yyyy'}}</span></td>								    
 								  </tr>
 							  </tbody>
 						</table>
 					
 				</div>
 		    </tab>
+-->		    
 		</tabset>
 	</div>
   </div>
