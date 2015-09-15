@@ -18,8 +18,18 @@ angular.module('frontendService', ['Base64'])
     deleteObject: function(pid) {
 
       return $http({
-        method  : 'GET',
+        method  : 'DELETE',
         url     : $('head base').attr('href') + 'delete/' + pid
+      });
+    },
+
+    requestPush: function(objects) {
+
+      return $http({
+        method  : 'POST',
+        url     : $('head base').attr('href') + 'push',
+        data    : angular.toJson(objects),
+        headers : {'Content-Type': 'application/json'}
       });
     },
           
@@ -53,25 +63,34 @@ angular.module('frontendService', ['Base64'])
       return selection;
     },
 
-    isSelected: function(pid) {
-      return selection.indexOf(pid) > -1;
+    isSelected: function(o) {
+      return this.getSelectedIdx(o) > -1;      
     },
 
-    toggleSelected: function(pid) {
-      var idx = selection.indexOf(pid);
+    getSelectedIdx: function(o){
+      for (var i = 0; i < selection.length; i++) {
+        if(selection[i].PID == o.PID){
+          return i;
+        }
+      }
+      return -1;
+    },
+
+    toggleSelected: function(o) {
+      var idx = this.getSelectedIdx(o);
       if(idx >= 0){
         selection.splice(idx, 1);
       }else{
-        selection.push(pid);
+        selection.push(o);
       }
     },
 
-    addToSelection: function(pid) {
-      selection.push(pid);
+    addToSelection: function(o) {
+      selection.push(o);
     },
 
-    removeFromSelection: function(pid) {  
-      selection.splice(selection.indexOf(pid), 1);
+    removeFromSelection: function(o) {  
+      selection.splice(this.getSelectedIdx(o), 1);
     },
 
     setConfig: function(cfg){
@@ -82,16 +101,5 @@ angular.module('frontendService', ['Base64'])
       return config;
     },
 
-
-/*
-    getObjects: function(temp) {
-
-         return $http({
-             method  : 'GET',
-             url     : $('head base').attr('href') + 'objects',            
-             params  : { temp: temp ? 1 : 0 }
-         });
-    },
-*/
   }
 });

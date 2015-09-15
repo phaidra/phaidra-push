@@ -29,7 +29,7 @@ sub load {
     my ($self, $sid) = @_;
 
     my $res = $self->mango->db->collection('session')->find_one({_id => $sid});
-    my $expires = $res->{expires}/1000;
+    my $expires = $res->{expires}/1000 if defined($res->{expires});
 
     return ($expires, $res->{data});
 }

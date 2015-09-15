@@ -22,7 +22,7 @@
         </div>
         <div class="large-4 columns right">      
           <input id="checkbox1" type="checkbox" ng-model="agreed"><label for="checkbox1">I agree</label>          
-          <button ng-disabled="!agreed" ng-click="startDelete([pid])">Delete</button>
+          <button ng-disabled="!agreed" ng-click="startDelete([{PID: pid}])">Delete</button>
         </div>
       </div>
     </form>

@@ -19,8 +19,8 @@
 
     <table class="table objectlist">      
       <tbody>
-        <tr class="listitem" ng-repeat="pid in getSelection()">             
-          <td><a class="permalink" target="_blank" href="https://{{phaidratemp_baseurl}}/{{pid}}" title="https://{{phaidratemp_baseurl}}/{{pid}}" alt="https://{{phaidratemp_baseurl}}/{{pid}}">https://{{phaidratemp_baseurl}}/{{pid}}</a></td>
+        <tr class="listitem" ng-repeat="o in getSelection()">             
+          <td><a class="permalink" target="_blank" href="https://{{phaidratemp_baseurl}}/{{o.PID}}" title="https://{{phaidratemp_baseurl}}/{{o.PID}}" alt="https://{{phaidratemp_baseurl}}/{{o.PID}}">https://{{phaidratemp_baseurl}}/{{o.PID}}</a></td>
         </tr>
       </tbody>
     </table>

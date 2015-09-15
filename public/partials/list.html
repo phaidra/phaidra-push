@@ -48,7 +48,7 @@
 										  <li><a href="#" ng-click="resetSelection()">Unselect all</a></li>
 										  <li><a href="#" ng-click="selectAll()">Select all</a></li>
 										  <li><a href="#/delete_selection/">Delete selected...</a></li>
-										  <li><a href="#/publish_selection/">Publish selected...</a></li>
+										  <li><a ng-click="checkSimpleOnly()">Publish selected...</a></li>
 										</ul>																			  		
 								  	</th>
 								  	<th></th>
@@ -61,24 +61,15 @@
 								  </tr>
 							  </thead>
 							  <tbody>
-								  <tr class="listitem" ng-class="{'listitem-selected': isSelected(object.PID)}" ng-repeat="object in objects[instance] | orderBy:'updated'">	  
-								    <td data-ng-click="toggleSelected(object.PID)"><span class="fi-flag flag" ng-class="{'flag-selected': isSelected(object.PID)}"></span></td>
+								  <tr class="listitem" ng-class="{'listitem-selected': isSelected(object)}" ng-repeat="object in objects[instance] | orderBy:'updated'">	  
+								    <td data-ng-click="toggleSelected(object)"><span class="fi-flag flag" ng-class="{'flag-selected': isSelected(object)}"></span></td>
 								  	<td bind-once ><img src="https://{{baseurls[instance]}}/preview/{{object.PID}}///60" class="img-thumbnail" width="40" height="40" title="{{object['uw.general.title']}}" alt="{{object['uw.general.title']}}"></td>
 								  	<td bind-once ><span class="title">{{object['uw.general.title']}}</span></td>					  	
 								  	<td><a class="permalink" target="_blank" href="https://{{baseurls[instance]}}/{{object.PID}}" title="https://{{baseurls[instance]}}/{{object.PID}}" alt="https://{{baseurls[instance]}}/{{object.PID}}">https://{{baseurls[instance]}}/{{object.PID}}</a></td>						  	
 								    <td bind-once ><span class="list-date">{{object['fgs.createdDate'] | date:'dd.MM.yyyy'}}</span></td>
 								    <td bind-once ><span class="list-date">{{object['fgs.lastModifiedDate'] | date:'dd.MM.yyyy'}}</span></td>
 								    <td ng-if="instance == 'phaidra-temp'" bind-once ><a href="#/delete/{{object.PID}}"><i class="fi-trash"></i></a></td>
-								  	<td ng-if="instance == 'phaidra-temp'" bind-once >
-								  		<div ng-switch on="object['fgs.contentModel']">
-								  			<div ng-switch-when="cmodel:Collection">
-								  				
-								  			</div>
-								  			<div ng-switch-default>
-								  				<a href="#/push/{{object.PID}}"><i class="fi-arrow-right"></i></a>
-								  			</div>
-								  		</div>
-								  	</td>
+								  	<td ng-if="instance == 'phaidra-temp'" bind-once ><a ng-if="isSimpleObject(object)" href="#/push/{{object.PID}}"><i class="fi-arrow-right"></i></a></td>
 								  </tr>
 							  </tbody>
 					</table>

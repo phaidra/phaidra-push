@@ -6,6 +6,7 @@ app.factory('pT', function (promiseTracker) {
 
 app.run(function($rootScope, pT) {
     $rootScope.spinnerOpts = {
+      /*
       lines: 8 // The number of lines to draw
     , length: 0 // The length of each line
     , width: 14 // The line thickness
@@ -25,6 +26,24 @@ app.run(function($rootScope, pT) {
     , shadow: false // Whether to render a shadow
     , hwaccel: true // Whether to use hardware acceleration
     , position: 'relative' // Element positioning
+*/
+    lines: 11,            // The number of lines to draw
+    length: 6,            // The length of each line
+    width: 3,             // The line thickness
+    radius: 8,           // The radius of the inner circle
+    rotate: 0,            // Rotation offset
+    corners: 1,           // Roundness (0..1)
+    color: '#95a5a6',        // #rgb or #rrggbb
+    direction: -1,         // 1: clockwise, -1: counterclockwise
+    speed: 1,             // Rounds per second
+    trail: 100,           // Afterglow percentage
+    opacity: 1/10,         // Opacity of the lines
+    fps: 20,              // Frames per second when using setTimeout()
+    zIndex: 2e9,          // Use a high z-index by default
+    className: 'spinner', // CSS class to assign to the element
+    top: '40%',          // center vertically
+    left: '50%',         // center horizontally
+    position: 'absolute'  // element position
   }
 
   $rootScope.spinner = new Spinner($rootScope.spinnerOpts);
@@ -56,8 +75,8 @@ app.config(['$routeProvider',
         templateUrl: 'partials/push.html',
         controller: 'PushCtrl'
       }).
-      when('/push/', {
-        templateUrl: 'partials/push.html',
+      when('/push_selection/', {
+        templateUrl: 'partials/push_selection.html',
         controller: 'PushCtrl'
       }).
       otherwise({              
@@ -93,31 +112,32 @@ actionControllers.controller('DeleteCtrl', function($scope, $routeParams, DataSe
       $scope.alerts.splice(index, 1);
     };
   
-    $scope.startDelete = function(pids) {
+    $scope.startDelete = function(objects) {
     
-      var stop = false;
-      for (var i = 0; i < pids.length; i++) {
-        if(stop){
+      var error = false;
+      for (var i = 0; i < objects.length; i++) {
+        if(error){
           break;
         }
-        $scope.progress_message = "Deleting object " + pids[i];        
-        var promise = FrontendService.deleteObject(pids[i]);
+        $scope.progress_message = "Deleting object " + objects[i].PID;        
+        var promise = FrontendService.deleteObject(objects[i].PID);
         pT.addPromise(promise);
         promise.then(
           function(response) {
-            //$scope.alerts = response.data.alerts;  
-            FrontendService.removeFromSelection(pids[i]);  
-            $scope.success = true;
+            FrontendService.removeFromSelection(objects[i].PID);              
           }
           ,function(response) {          
             if(response.data){
               if(response.data.alerts){
                 $scope.alerts = response.data.alerts;
-                stop = true;
+                error = true;
               }
             }
           }
         );
+      }
+      if(!error){
+        $scope.success = true;
       }
       $scope.progress_message = '';
     };
@@ -125,13 +145,53 @@ actionControllers.controller('DeleteCtrl', function($scope, $routeParams, DataSe
     $scope.init();
 });
 
-actionControllers.controller('PushCtrl', ['$scope', '$routeParams',
-  function($scope, $routeParams) {
-    $scope.pid = $routeParams.pid;
-  }]
-);
+actionControllers.controller('PushCtrl', function($scope, $routeParams, DataService, FrontendService, pT) {
 
-actionControllers.controller('ListCtrl', function($rootScope, $scope, $window, $modal, $log, FrontendService, DataService, pT) {
+    $scope.pid = $routeParams.pid;
+    $scope.agreed = false;
+    $scope.alerts = [];
+    $scope.success = false;
+
+    $scope.initdata = '';
+    $scope.phaidratemp_baseurl = '';
+
+    $scope.init = function () {
+      $scope.initdata = DataService.getInitData();
+      $scope.phaidratemp_baseurl = $scope.initdata.phaidratemp_baseurl;
+    };
+
+    $scope.getSelection = function(){
+      return FrontendService.getSelection();
+    };
+
+    $scope.closeAlert = function(index) {
+      $scope.alerts.splice(index, 1);
+    };
+  
+    $scope.startPush = function(objects) {
+          
+      var promise = FrontendService.requestPush(objects);      
+      pT.addPromise(promise);
+      promise.then(
+        function(response) { 
+          $scope.alerts = response.data.alerts;     
+          $scope.success = true;
+        }        
+        ,function(response) {
+          if(response.data){
+            if(response.data.alerts){
+              $scope.alerts = response.data.alerts;
+            }
+          }
+        }
+      );
+     
+    };
+
+  $scope.init();
+});
+
+actionControllers.controller('ListCtrl', function($rootScope, $scope, $window, $location, $modal, $log, FrontendService, DataService, pT) {
   
   $scope.alerts = {
     "phaidra-temp": [],
@@ -189,12 +249,12 @@ actionControllers.controller('ListCtrl', function($rootScope, $scope, $window, $
     }
   };
 
-  $scope.isSelected = function(pid){
-    return FrontendService.isSelected(pid);
+  $scope.isSelected = function(object){
+    return FrontendService.isSelected(object);
   }
 
-  $scope.toggleSelected = function(pid){
-    FrontendService.toggleSelected(pid);  
+  $scope.toggleSelected = function(object){
+    FrontendService.toggleSelected(object);  
   }
 
   $scope.getSelection = function(){
@@ -215,8 +275,7 @@ actionControllers.controller('ListCtrl', function($rootScope, $scope, $window, $
       "from": 1,
       "limit": 0,
       "sort": 'PIDNum,INT',
-      "reverse": 0,
-      "fields": ['PID']
+      "reverse": 0
     }
 
     var promise = FrontendService.search('phaidra-temp', paging);      
@@ -226,7 +285,7 @@ actionControllers.controller('ListCtrl', function($rootScope, $scope, $window, $
         $scope.alerts['phaidra-temp'] = response.data.alerts;     
         var a = [];
         for (var i = 0; i < response.data.objects.length; i++) {
-            a.push(response.data.objects[i].PID);
+            a.push(response.data.objects[i]);
         }
         FrontendService.setSelection(a);
       }        
@@ -242,6 +301,33 @@ actionControllers.controller('ListCtrl', function($rootScope, $scope, $window, $
     
   };
 
+  $scope.checkSimpleOnly = function(){
+      var selection = FrontendService.getSelection();
+      for (var i = 0; i < selection.length; i++) {
+        if(!$scope.isSimpleObject(selection[i])){
+          $scope.alert_open('You can only push simple objects like pictures, documents, audio or video, but not collections or books, etc. Please revise your selection.');
+          return false;          
+        }
+      }
+      $location.path("/push_selection/");
+  }
+
+  $scope.isSimpleObject = function(object){
+
+    switch(object['fgs.contentModel']){
+      case 'cmodel:Picture':
+      case 'cmodel:Audio':
+      case 'cmodel:Video':
+      case 'cmodel:PDFDocument':
+      case 'cmodel:LaTeXDocument':
+      case 'cmodel:Asset':
+        return true;
+      default:
+        return false;
+    }
+
+  };
+
   $scope.closeAlert = function(index, instance) {
     $scope.alerts[instance].splice(index, 1);
   };
@@ -250,6 +336,17 @@ actionControllers.controller('ListCtrl', function($rootScope, $scope, $window, $
     var modalInstance = $modal.open({
       templateUrl: $('head base').attr('href')+'partials/modals/loginform.html',
       controller: SigninModalCtrl
+    });
+  };
+
+  $scope.alert_open = function (msg) {
+    var modalInstance = $modal.open({
+      templateUrl: $('head base').attr('href')+'partials/modals/alert.html',
+      controller: AlertModalCtrl,
+      resolve: { msg: function () {
+          return msg;
+        } 
+      }
     });
   };
 
@@ -360,6 +457,14 @@ var SigninModalCtrl = function ($scope, $modalInstance, FrontendService, pT) {
     $modalInstance.dismiss('cancel');
   };
 };
+
+var AlertModalCtrl = function ($scope, $modalInstance, msg) {
+  $scope.msg = msg;
+  $scope.ok = function () {
+    $modalInstance.dismiss('ok');
+  };
+};
+
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);

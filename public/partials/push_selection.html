@@ -1,7 +1,7 @@
 <div class="row footer-margin content-margin" ng-hide="success">
   <div class="small-8 medium-6 large-6 small-centered columns">
 
-    <h1>Publishing object {{pid}}</h1>
+    <h1>Publishing objects</h1>
 
     <p>
     Bacon ipsum dolor amet biltong jowl meatloaf meatball shoulder. Shank fatback brisket kielbasa. Kevin ball tip tongue, salami drumstick ground round biltong pork boudin turkey landjaeger sausage. Picanha frankfurter sirloin tenderloin.
@@ -14,6 +14,16 @@
     <p>
     Pig beef ribs bacon, ground round leberkas pancetta shank pork belly tri-tip strip steak cow cupim chicken meatloaf rump. Strip steak swine turducken pork beef ribs t-bone. Ribeye boudin ground round biltong, rump meatloaf spare ribs turkey shank beef ribs porchetta picanha tri-tip. Picanha bresaola swine prosciutto porchetta cupim ribeye ham drumstick, shank ham hock pancetta. Pork belly turkey cupim bacon picanha alcatra rump tri-tip beef salami chuck ham. Pancetta tongue t-bone shank spare ribs ham hock.
     </p>
+    
+    <h1>Objects to be published</h1>
+
+    <table class="table objectlist">      
+      <tbody>
+        <tr class="listitem" ng-repeat="o in getSelection()">             
+          <td><a class="permalink" target="_blank" href="https://{{phaidratemp_baseurl}}/{{o.PID}}" title="https://{{phaidratemp_baseurl}}/{{o.PID}}" alt="https://{{phaidratemp_baseurl}}/{{o.PID}}">https://{{phaidratemp_baseurl}}/{{o.PID}}</a></td>
+        </tr>
+      </tbody>
+    </table>
 
     <form>
       <div class="row">
@@ -22,12 +32,12 @@
         </div>
         <div class="large-4 columns right">      
           <input id="checkbox1" type="checkbox" ng-model="agreed"><label for="checkbox1">I agree</label>          
-          <button ng-disabled="!agreed" ng-click="startPush([pid])">Publish</button>
+          <button ng-disabled="!agreed" ng-click="startPush(getSelection())">Publish</button>
         </div>
       </div>
     </form>
 
-    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">Error creating publishing request for object {{pid}}: {{alert.msg}}</alert>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">Error publishing objects: {{alert.msg}}</alert>
 
   </div>
 </div>
@@ -35,7 +45,7 @@
 <div class="row footer-margin content-margin" ng-show="success">
   <div class="small-8 medium-6 large-6 small-centered columns">
 
-    <h1>Object {{pid}} .....</h1>
+    <h1>Publish request successfuly created.</h1>
     <p><a href="#">Back to my objects</a></p>
 
   </div>

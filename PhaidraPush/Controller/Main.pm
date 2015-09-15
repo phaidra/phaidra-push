@@ -31,25 +31,16 @@ sub home {
   $self->render('index');
 };
 
-=cut
-sub delete {
-  my $self = shift;
-  my $pid = $self->stash('pid');
-
-  my $init_data = { pid => $pid, current_user => $self->current_user };
-  $self->stash(init_data => encode_json($init_data));
-  $self->stash(init_data_perl => $init_data);
-  $self->render('delete');
-}
 
 sub push {
   my $self = shift;
-  my $pid = $self->stash('pid');
+  my $objects = $self->req->json;
 
-  my $init_data = { pid => $pid, current_user => $self->current_user };
-  $self->stash(init_data => encode_json($init_data));
-  $self->stash(init_data_perl => $init_data);
-  $self->render('push');
-}
-=cut
+  my $res = { alerts => [], status => 200 };
+
+  $self->app->log->debug($self->app->dumper($objects));
+
+  $self->render(json => $res, status => $res->{status} );
+};
+
 1;
