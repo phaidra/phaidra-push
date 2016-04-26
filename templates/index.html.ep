@@ -12,7 +12,7 @@
         <base href="<%= url_for->path('/')->to_abs %>">
     <% } %>
 
-    <title>Phaidra Push</title>
+    <title>Phaidra Managementmodul</title>
 
     <link rel="ICON" href="<%= url_for '/img/favicon.ico' %>" type="image/x-icon" />
 
@@ -28,11 +28,15 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-animate.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-sanitize.js"></script>
 
-    <%#  Foundation %>
+    <%# Foundation %>
     <%# <link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.2/css/foundation.min.css" rel="stylesheet"> %>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.2/css/normalize.min.css" rel="stylesheet">
     <link href="<%= url_for '/css/foundation-icons.css' %>" rel="stylesheet">
 
+    <%# Angular-translate %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-translate/2.10.0/angular-translate.min.js"></script>
+    <!-- <script src="<%= url_for '/js/angular-translate.min.js' %>"></script> -->
+    
     <%# Angular-Foundation %>
     <script src="<%= url_for '/js/mm-foundation-tpls-0.6.0.min.js' %>"></script>    
     <script src="<%= url_for '/js/promise-tracker-2.1.0.js' %>"></script>
@@ -68,7 +72,7 @@
     <li class="name">
       <h1>
         <!--<img class="phaidra-logo" src="/img/phaidra_shadow_small.png" height="35">-->
-        <a href="./" class="logo">Phaidra Push</a>
+        <a href="./" class="logo" translate>PHAIDRA_MANAGEMENTMODULE</a>
       </h1>
     </li>    
   </ul>
@@ -103,9 +107,12 @@
 
   <footer class="footer row">
     <div class="medium-12 columns">
-      <div class="left"><a href="#" data-page="page-help">Help</a></div>
+      <div class="left"><a href="#" ng-click="help_open()" translate>HELP</a></div>
       <div class="right">
-        <a href="#" class="link link-first" data-page="page-contact">Contact</a>
+        <a href="#" class="link link-first" ng-click="contact_open()" translate>CONTACT</a>
+        <a href="#" class="link link-first" ng-click="impressum_open()" translate>Impressum</a>
+        <a href="#" class="link link-first" ng-show="currentLanguage() == 'en'" ng-click="changeLanguage('de')" translate>BUTTON_LANG_DE</a>
+        <a href="#" class="link link-first" ng-show="currentLanguage() == 'de'" ng-click="changeLanguage('en')" translate>BUTTON_LANG_EN</a>
         <a href="http://univie.ac.at" target="_blank" class="link link-last"><img src="/img/uni_logo_farbe_02_small.png" height="20"></a>
       </div>
     </div>
