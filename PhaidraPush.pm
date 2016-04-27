@@ -58,14 +58,11 @@ sub startup {
           # keep this here, the set method may change the structure a bit so we better read it again
           $login_data = $self->app->chi->get($ldkey);        
         }else {
-            
-          my ($err, $code) = $tx->error;
-          $code = 'Not defined code!' if not defined $code;
-          $self->app->log->info("Loading logig data failed for user $username. Error code: $code, Error: $err");
+          $self->app->log->info("Loading logig data failed for user $username. Error:".$self->app->dumper($tx->error));
           if($tx->res->json && exists($tx->res->json->{alerts})){   
-            $self->stash({phaidra_auth_result => { alerts => $tx->res->json->{alerts}, status  =>  $code ? $code : 500 }});             
+            $self->stash({phaidra_auth_result => { alerts => $tx->res->json->{alerts}, status  =>  $tx->code }});             
           }else{
-            $self->stash({phaidra_auth_result => { alerts => [{ type => 'danger', msg => $err }], status  =>  $code ? $code : 500 }});
+            $self->stash({phaidra_auth_result => { alerts => [{ type => 'danger', msg => $tx->error }], status  =>  $tx->code }});
           }
             
           return undef;
@@ -94,26 +91,19 @@ sub startup {
             # save token
             my $token = $tx->res->cookie($self->app->config->{authentication}->{token_cookie})->value;  
       
-            my $session = $self->stash('mojox-session');
-          $session->load;
-          unless($session->sid){    
-            $session->create;   
-          } 
-          $self->save_token($token);
+            $self->save_token($token);
             
             $self->app->log->info("User $username successfuly authenticated");
             $self->stash({phaidra_auth_result => { token => $token , alerts => $tx->res->json->{alerts}, status  =>  200 }});
             
             return $username;
-       }else {
-          
-          my ($err, $code) = $tx->error;
-          $code = 'Not defined code!' if not defined $code;
-          $self->app->log->info("Authentication failed for user $username. Error code: $code, Error: $err");
+       }else {          
+        
+          $self->app->log->info("Authentication failed for user $username. Error:".$self->app->dumper($tx->error));
           if($tx->res->json && exists($tx->res->json->{alerts})){   
-            $self->stash({phaidra_auth_result => { alerts => $tx->res->json->{alerts}, status  =>  $code ? $code : 500 }});             
+            $self->stash({phaidra_auth_result => { alerts => $tx->res->json->{alerts}, status  =>  $tx->code }});             
           }else{
-            $self->stash({phaidra_auth_result => { alerts => [{ type => 'danger', msg => $err }], status  =>  $code ? $code : 500 }});
+            $self->stash({phaidra_auth_result => { alerts => [{ type => 'danger', msg => $tx->error }], status  =>  $tx->code }});
           }
           
           return undef;
@@ -148,7 +138,7 @@ sub startup {
     $session->load;
     if($session->sid){
       # we need mojox-session only for signed-in users
-      if($self->signature_exists){
+      if($self->is_user_authenticated){
         $session->extend_expires;
         $session->flush;
       }else{
@@ -182,17 +172,19 @@ sub startup {
   $self->sessions->cookie_name('a_'.$config->{installation_id});
 
     $self->helper(save_token => sub {
+
       my $self = shift;
-    my $token = shift;
+      my $token = shift;
 
-    my $session = $self->stash('mojox-session');
-    $session->load;
-    unless($session->sid){
-      $session->create;
-    }
+      my $session = $self->stash('mojox-session');
+      $session->load;
+      unless($session->sid){
+        $session->create;
+      }
 
-    $session->data(token => $token);
+      $session->data(token => $token);
     });
+
 
     $self->helper(load_token => sub {
       my $self = shift;
