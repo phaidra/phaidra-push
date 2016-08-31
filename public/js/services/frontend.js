@@ -62,6 +62,16 @@ angular.module('frontendService', ['Base64'])
     getSelection: function() {
       return selection;
     },
+    
+    getSelectionPID: function() {
+        
+       var selectionPID = [];
+       for (var i = 0; i < selection.length; i++) {
+               selectionPID.push(selection[i].PID);
+       }
+       return selectionPID;
+    },
+    
 
     isSelected: function(o) {
       return this.getSelectedIdx(o) > -1;      

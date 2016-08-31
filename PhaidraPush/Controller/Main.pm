@@ -2,11 +2,19 @@ package PhaidraPush::Controller::Main;
 
 use strict;
 use warnings;
+use Data::Dumper;
+
 use diagnostics;
 use v5.10;
 use utf8;
 use Mojo::JSON qw(encode_json);
 use base 'Mojolicious::Controller';
+use PhaidraPush::Model::Email;
+
+
+use base 'MojoX::Session::Store';
+use Mango 0.24;
+__PACKAGE__->attr('mango');
 
 sub home {
   my $self = shift;  
@@ -36,11 +44,41 @@ sub push {
   my $self = shift;
   my $objects = $self->req->json;
 
-  my $res = { alerts => [], status => 200 };
+  my $res = { alerts => [], status => 201 };
 
+  
   $self->app->log->debug($self->app->dumper($objects));
+  $self->app->log->debug(@{$objects}[0]);
 
-  $self->render(json => $res, status => $res->{status} );
+  my $entwDataSet = $self->mango_phaidra->db->collection('jobs')->insert({
+                                                                           'old_pid' => $objects, 
+                                                                           'type' => 'push', 
+                                                                           'owner' => $self->current_user->{username}, 
+                                                                           'ts' => time, 
+                                                                           'status' => 'new', 
+                                                                           'agent' => 'push_agent',
+                                                                           'origin_instance' => $self->app->config->{'phaidra-temp'}->{baseurl}
+                                                                         });
+  
+  
+  my $credetials;
+  $credetials->{username}     = $self->app->config->{'directory_user'}->{username};
+  $credetials->{password} = $self->app->config->{'directory_user'}->{password};
+  my $Email = PhaidraPush::Model::Email->new;
+  my $emailConf =  $self->app->config->{'email'};
+  my $myEmail = $Email->getEmail($self,  $self->app->config->{'phaidra'}->{apibaseurl}, $credetials, $self->current_user->{username});
+
+  my $r = $Email->send_email(
+                             $self, 
+                             $self->app->config->{'phaidra'}->{apibaseurl}, 
+                             $credetials, $emailConf, 
+                             @{$objects}[0], 
+                             $self->current_user->{username}, 
+                             'en',
+                             $myEmail
+                            );
+  
+  $self->render('index');
 };
 
 1;

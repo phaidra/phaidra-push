@@ -206,7 +206,8 @@ actionControllers.controller('DeleteCtrl', function($scope, $routeParams, DataSe
     $scope.getSelection = function(){
       return FrontendService.getSelection();
     };
-
+    
+    
     $scope.closeAlert = function(index) {
       $scope.alerts.splice(index, 1);
     };
@@ -266,7 +267,10 @@ actionControllers.controller('PushCtrl', function($scope, $routeParams, DataServ
     $scope.closeAlert = function(index) {
       $scope.alerts.splice(index, 1);
     };
-  
+    $scope.getSelectionPID = function(){
+             return FrontendService.getSelectionPID();
+    };
+    
     $scope.startPush = function(objects) {
           
       var promise = FrontendService.requestPush(objects);      
@@ -505,6 +509,7 @@ actionControllers.controller('ListCtrl', function($rootScope, $scope, $window, $
   $scope.setLang = function(langKey) {
     $translate.use(langKey);
   };
+  
 
 });
 

@@ -54,6 +54,8 @@ sub startup {
         if (my $res = $tx->success) {
           $login_data =  $tx->res->json->{user_data};        
           $self->app->log->info("Loaded user: ".$self->app->dumper($login_data));
+          $self->stash({username => $login_data->{username}}); 
+         
           $self->app->chi->set($ldkey, $login_data, '1 day');
           # keep this here, the set method may change the structure a bit so we better read it again
           $login_data = $self->app->chi->get($ldkey);        
@@ -84,7 +86,7 @@ sub startup {
       my @base = split('/',$self->app->config->{'phaidra-temp'}->{apibaseurl});
       $url->host($base[0]);
       $url->path($base[1]."/signin") if exists($base[1]); 
-        my $tx = $self->ua->get($url); 
+      my $tx = $self->ua->get($url); 
     
       if (my $res = $tx->success) {
             
@@ -116,6 +118,12 @@ sub startup {
   $self->attr(_mango_phaidrapush => sub { return Mango->new('mongodb://'.$config->{mongodb_phaidrapush}->{username}.':'.$config->{mongodb_phaidrapush}->{password}.'@'.$config->{mongodb_phaidrapush}->{host}.'/'.$config->{mongodb_phaidrapush}->{database}) });
   $self->helper(mango_phaidrapush => sub { return shift->app->_mango_phaidrapush});
 
+  $self->attr(_mango_phaidra => sub { return Mango->new('mongodb://'."$config->{phaidra}->{mongodb}->{username}".':'."$config->{phaidra}->{mongodb}->{password}".'@'."$config->{phaidra}->{mongodb}->{host}".'/'.$config->{phaidra}->{mongodb}->{database}) }); 
+  $self->helper(mango_phaidra => sub { return shift->app->_mango_phaidra});
+   
+
+  
+  
   # we might possibly save a lot of data to session
   # so we are not going to use cookies, but a database instead
   $self->plugin(
