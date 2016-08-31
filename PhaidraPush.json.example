@@ -27,7 +27,19 @@
         "baseurl": "phaidra.univie.ac.at",
         "apibaseurl": "services.phaidra.univie.ac.at/api/"
     },
-
+    "email":{
+            "instance": "phaidra.univie.ac.at",
+            "email": "examplea@example.com",
+            "language": "en",
+            "baseurl": "services.phaidra.univie.ac.at/api/",
+            "supportemail": "examplea@example.com",
+            "From": "examplea@example.com",
+            "To": "examplea@example.com",
+            "Subject": "some message",
+            "Charset": "utf8",
+            "Encoding": "quoted-printable",
+            "template_include_path": "../../templates/Email"
+    },
     "mongodb_phaidrapush": {
         "host": "stage.phaidra.org",
         "port": "27017",

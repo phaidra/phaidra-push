@@ -1,0 +1,13 @@
+{
+   "instance": "phaidra.univie.ac.at",
+   "email": "example@example.com",
+   "language": "en",
+   "baseurl": "services.phaidra.univie.ac.at/api/",
+   "supportemail": "example@example.com",
+   "From": "example@example.com",
+   "To": "example@example.com",
+   "Subject": "some text",
+   "Charset": "utf8",
+   "Encoding": "quoted-printable",
+   "template_include_path": "/templates/"
+}

@@ -1,0 +1,44 @@
+[% IF !language || language == 'de' %]          
+Sehr geehrte/r Phaidra-push Nutzer/in,
+Sie haben in Phaidra-push eine Datei hochgeladen.
+Sie finden Ihr Dokument oder Material unter:
+                        [% FOREACH mypid IN pids %]                                                                                    
+                  
+                                  <a href="http://[% instance %]/view/[% mypid %]">http://[% instance %]/view/[% mypid %]</a></p></br>
+                        [% END %]
+Ab sofort wird es auch von wissenschaftlichen Suchmaschinen wie z.B. BASE (http://www.base-search.net/) indexiert.
+Falls Sie Fragen haben, Fehler entdecken, zu einem späteren Zeitpunkt eine Änderung der Daten wünschen sollten oder Kritik an Phaidra-push äußern möchten, wenden Sie sich bitte an uns. Wir würden uns freuen, wenn Sie auch in Zukunft dieses Service nutzen und es Ihren KollegInnen weiterempfehlen.
+
+Mit freundlichen Grüßen
+Ihr Repository Management
+-------------------------
+Phaidra
+Universität Wien
+Bibliotheks- und Archivwesen
+Tel. +43xxxxxxxxxxxxx
+[% supportemail %]
+[% END %]
+[% IF !language %]<br/>[% END %]
+[% IF !language || language == 'en' %]
+Dear user of Phaidra-push,
+You have uploaded a file(s) on Phaidra-push.
+You can find your document or material at:
+                        [% FOREACH mypid IN pids %]                                                                                    
+                  
+                                http://[% instance %]/view/[% mypid %]">http://[% instance %]/view/[% mypid %]</a></p></br>
+                        [% END %]
+By now, it will also be indexed by scientific search engines like BASE (http://www.base-search.net/).
+Should you have any questions, require any corrections at a later moment or want to report any mistakes or comment on Phaidra-push, please do not hesitate to contact us! We would appreciate it, if you make use of u:scholar in the future as well and recommend it to your colleagues.
+
+
+Sincerely Yours
+Phaidra-push Repository Management
+-------------------------
+Phaidra
+Vienna University
+Library and Archive Services
+Tel. +43xxxxxxxxxxx
+[% supportemail %]
+[% END %]
+
+ 

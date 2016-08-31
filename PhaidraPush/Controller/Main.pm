@@ -71,7 +71,8 @@ sub push {
   my $r = $Email->send_email(
                              $self, 
                              $self->app->config->{'phaidra'}->{apibaseurl}, 
-                             $credetials, $emailConf, 
+                             $credetials, 
+                             $emailConf, 
                              @{$objects}[0], 
                              $self->current_user->{username}, 
                              'en',

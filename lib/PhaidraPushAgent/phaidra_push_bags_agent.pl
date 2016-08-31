@@ -100,15 +100,17 @@ while(1){
                                }
                           }
                           
-                          $collectionJobs->update({"_id" => MongoDB::OID->new(value => $jobsId) }, {'$set' => {'bags' => $jobBags, 'time' => time}});
+                          $collectionJobs->update({"_id" => MongoDB::OID->new(value => $jobsId) }, {'$set' => {'bags' => $jobBags}});
+                          $collectionJobs->update({"_id" => MongoDB::OID->new(value => $jobsId) }, {'$set' => {'time' => time}});
+                          
                           # bags add status processed
-                          $collectionBags->update({"_id" => MongoDB::OID->new(value => $push_agent->{_id}->{value}) }, {'$set' => {'status'  => 'processed',
-                                                                                                                                   'time'    => time, 
-                                                                                                                                   'new_pid' => $result->{pid}}});
+                          $collectionBags->update({"_id" => MongoDB::OID->new(value => $push_agent->{_id}->{value}) }, {'$set' => {'status' => 'processed'}});
+                          $collectionBags->update({"_id" => MongoDB::OID->new(value => $push_agent->{_id}->{value}) }, {'$set' => {'time' => time}});
+                          $collectionBags->update({"_id" => MongoDB::OID->new(value => $push_agent->{_id}->{value}) }, {'$set' => {'new_pid' => $result->{pid}}});
                   }else{
-                          $collectionBags->update({"_id" => MongoDB::OID->new(value => $push_agent->{_id}->{value}) }, {'$set' => {'status' => 'error', 
-                                                                                                                                   'time'   => time, 
-                                                                                                                                   'error'  => $result->{error}}});
+                          $collectionBags->update({"_id" => MongoDB::OID->new(value => $push_agent->{_id}->{value}) }, {'$set' => {'status' => 'error'}});
+                          $collectionBags->update({"_id" => MongoDB::OID->new(value => $push_agent->{_id}->{value}) }, {'$set' => {'time' => time}});
+                          $collectionBags->update({"_id" => MongoDB::OID->new(value => $push_agent->{_id}->{value}) }, {'$set' => {'error' => $result->{error}}});
                   }
    }
    print "End while loop.\n";
