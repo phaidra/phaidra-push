@@ -337,24 +337,25 @@ sub getOctets($){
          my $res_data =  $tx->res->json;
                 my $tmp = $tx->res->content->asset;
                 $result->{result} = $tx->res->content->asset;
+                
                 return $result;
         }else {
-          print "Error1:", Dumper($tx->error);
-          if($tx->res->json && exists($tx->res->json->{alerts})){   
-               print 'Error2:', Dumper($tx->res->json->{alerts});
-               my $temp = $tx->res->json->{alerts};
-               my $temp2->{step} = 'object/pid/octets';
-               $temp2->{alerts} = $temp;
-               push @{$result->{error}}, $temp2;
-          }else{
-               print 'Error3:', Dumper($tx->error);
-               my $temp = $tx->error;
-               $temp->{step} = 'object/pid/octets';
-               push @{$result->{error}}, $temp;
-          }
+               print "Error1:", Dumper($tx->error);
+               if($tx->res->json && exists($tx->res->json->{alerts})){   
+                     print 'Error2:', Dumper($tx->res->json->{alerts});
+                     my $temp = $tx->res->json->{alerts};
+                     my $temp2->{step} = 'object/pid/octets';
+                     $temp2->{alerts} = $temp;
+                     push @{$result->{error}}, $temp2;
+               }else{
+                     print 'Error3:', Dumper($tx->error);
+                     my $temp = $tx->error;
+                     $temp->{step} = 'object/pid/octets';
+                     push @{$result->{error}}, $temp;
+               }
             
-          return $result;
-     } 
+               return $result;
+       } 
 
 }
 

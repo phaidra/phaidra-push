@@ -405,13 +405,17 @@ actionControllers.controller('ListCtrl', function($rootScope, $scope, $window, $
   };
 
   $scope.checkSimpleOnly = function(){
+      
+      console.log('aaa');
       var selection = FrontendService.getSelection();
       for (var i = 0; i < selection.length; i++) {
         if(!$scope.isSimpleObject(selection[i])){
           $scope.alert_open('You can only push simple objects like pictures, documents, audio or video, but not collections or books, etc. Please revise your selection.');
+          console.log('false');
           return false;          
         }
       }
+      console.log('push_selection');
       $location.path("/push_selection/");
   }
 

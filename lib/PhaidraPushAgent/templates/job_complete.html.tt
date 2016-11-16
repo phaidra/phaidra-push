@@ -1,11 +1,16 @@
         <html>
-                <body>                  
-                [% IF !language || language == 'de' %]          
+                <body>
+                [% IF !language || language == 'de' %]
+                        <p>Job erfolgreich beended!</p>
                         <p>Sehr geehrte/r Phaidra-push Nutzer/in,</p>
                         <p>Sie haben in Phaidra-push eine Datei erfolgreich hochgeladen.</p>
                         <p>Sie finden Ihr Dokument oder Material unter:</p>
-                        [% FOREACH mypid IN pids %]                                                                                    
-                  
+                        [% FOREACH mypid IN pids %]
+                                  <a href="http://[% instance %]/view/[% mypid %]">http://[% instance %]/view/[% mypid %]</a></p></br>
+                        [% END %]
+                        <br/>
+                        Original Objekte:<br/>
+                        [% FOREACH mypid IN oldpids %]
                                   <a href="http://[% instance %]/view/[% mypid %]">http://[% instance %]/view/[% mypid %]</a></p></br>
                         [% END %]
                         <p>Ab sofort wird es auch von wissenschaftlichen Suchmaschinen wie z.B. BASE (<a href="http://www.base-search.net/">http://www.base-search.net/</a>) indexiert.</p>
@@ -21,11 +26,16 @@
                 [% END %]
                 [% IF !language %]<br/>[% END %]
                 [% IF !language || language == 'en' %]
+                        <p>Job succesfuly finished!</p>
                         <p>Dear user of Phaidra-push,</p>
                         <p>You have succesfuly uploaded  your document(s).</p>
                         <p>You can find your document(s) or material at:</p>
-                        [% FOREACH mypid IN pids %]                                                                                    
-
+                        [% FOREACH mypid IN pids %]
+                                  <a href="http://[% instance %]/view/[% mypid %]">http://[% instance %]/view/[% mypid %]</a></p></br>
+                        [% END %]
+                        <br/>
+                        Original objects:<br/>
+                        [% FOREACH mypid IN oldpids %]
                                   <a href="http://[% instance %]/view/[% mypid %]">http://[% instance %]/view/[% mypid %]</a></p></br>
                         [% END %]
                         <p>By now, it will also be indexed by scientific search engines like BASE (<a href="http://www.base-search.net/">http://www.base-search.net/</a>).</p>
@@ -37,7 +47,7 @@
                         <p>Vienna University</p>
                         <p>Library and Archive Services</p>
                         <p>Tel. +431xxxxxxxxxxxx</p>
-                        <p><a href="mailto:[% supportemail %]">[% supportemail %]</a></p>                       
+                        <p><a href="mailto:[% supportemail %]">[% supportemail %]</a></p>
                 [% END %]
                 </body>
         </html>

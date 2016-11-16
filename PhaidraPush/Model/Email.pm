@@ -7,7 +7,7 @@ use base qw/Mojo::Base/;
 use MIME::Base64;
 use MIME::Lite::TT::HTML;
 use Email::Valid;
-
+use FindBin qw( $RealBin );
 
 
 sub getEmail
@@ -47,17 +47,16 @@ sub getEmail
 
 sub send_email
 {
-        my ($self, $c, $baseurl, $config, $emailConf, $p, $username, $language, $emailHash) = @_;
+        my ($self, $c, $baseurl, $config, $emailConf, $p, $username, $language, $emailHash) = @_; 
         
-        #print '$config:',Dumper($config);
         
         my $email = $emailHash->{email};
-        $c->app->log->debug("send_email!!!",$baseurl, $p,$email);
+
+        
         unless($username){
                 $c->app->log->debug("[$baseurl] [$username]: email to user cannot be sent, username missing.");
                 return; 
         }
-        $c->app->log->debug("[$baseurl] [$username]: email: $email");
         
         unless(Email::Valid->address($email)){
                 $c->app->log->debug("[$baseurl] [$username]: email to user cannot be sent, invalid email address: ",Dumper($email));
@@ -70,7 +69,8 @@ sub send_email
         $emaildata{language} = $emailConf->{language};
         $emaildata{baseurl} = $baseurl;
         $emaildata{supportemail} = $emailConf->{supportemail};
-
+        $emaildata{instance} = $emailConf->{instance};
+        
         my $subject;
         if($language eq 'de'){
                 $subject = "Phaidra-push - Redaktionelle Bearbeitung abgeschlossen";
@@ -78,16 +78,13 @@ sub send_email
                 $subject = "Phaidra-push - Submission process completed";
         }
         
-        #$c->app->log->debug('emaildata11:',Dumper(\%emaildata));
-        
         my %options; 
-        $options{INCLUDE_PATH} = $emailConf->{template_include_path};
+        #$options{INCLUDE_PATH} = $RealBin.$emailConf->{template_include_path};
+        $options{INCLUDE_PATH} = $emailConf->{installation_dir}.$emailConf->{template_path};
 
-        $c->app->log->debug("send email1 ######");
-        
+        $c->app->log->debug(" INCLUDE_PATH:  $options{INCLUDE_PATH}");
         eval
         {
-                $c->app->log->debug("send email2 ######");
                 my $msg = MIME::Lite::TT::HTML->new(
                         From        => $emailConf->{From},
                         To          => $emailConf->{email},

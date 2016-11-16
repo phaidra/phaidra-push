@@ -47,23 +47,28 @@ sub push {
   my $res = { alerts => [], status => 201 };
 
   
-  $self->app->log->debug($self->app->dumper($objects));
-  $self->app->log->debug(@{$objects}[0]);
+  $self->app->log->debug('$objects123:',$self->app->dumper($objects));
+  #$self->app->log->debug(@{$objects}[0]);
 
   my $entwDataSet = $self->mango_phaidra->db->collection('jobs')->insert({
                                                                            'old_pid' => $objects, 
                                                                            'type' => 'push', 
                                                                            'owner' => $self->current_user->{username}, 
                                                                            'ts' => time, 
+                                                                            #'status' => 'scheduled',
                                                                            'status' => 'new', 
                                                                            'agent' => 'push_agent',
-                                                                           'origin_instance' => $self->app->config->{'phaidra-temp'}->{baseurl}
+                                                                           'origin_instance' => $self->app->config->{'phaidra-temp'}->{id},
+                                                                           'project' => 'phaidra-push',
+                                                                           'ingest_instance' => $self->app->config->{phaidra}->{id},
+                                                                           'notify_user_on_success' => 1,
+                                                                           'user_notified' => 0
                                                                          });
   
   
   my $credetials;
   $credetials->{username}     = $self->app->config->{'directory_user'}->{username};
-  $credetials->{password} = $self->app->config->{'directory_user'}->{password};
+  $credetials->{password}     = $self->app->config->{'directory_user'}->{password};
   my $Email = PhaidraPush::Model::Email->new;
   my $emailConf =  $self->app->config->{'email'};
   my $myEmail = $Email->getEmail($self,  $self->app->config->{'phaidra'}->{apibaseurl}, $credetials, $self->current_user->{username});
@@ -73,7 +78,8 @@ sub push {
                              $self->app->config->{'phaidra'}->{apibaseurl}, 
                              $credetials, 
                              $emailConf, 
-                             @{$objects}[0], 
+                             #@{$objects}[0], 
+                             $objects,
                              $self->current_user->{username}, 
                              'en',
                              $myEmail

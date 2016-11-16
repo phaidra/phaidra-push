@@ -4,13 +4,13 @@ Sie haben in Phaidra-push eine Datei forgelegt.
 Dokument(en) der Sie forgelegt haben, sind:
                         [% FOREACH mypid IN pids %]                                                                                    
                   
-                                  <a href="http://[% instance %]/view/[% mypid %]">http://[% instance %]/view/[% mypid %]</a></p></br>
+                                  <a href="https://[% instance %]/view/[% mypid %]">https://[% instance %]/view/[% mypid %]</a></p></br>
                         [% END %]
 Ab sofort wird es auch von wissenschaftlichen Suchmaschinen wie z.B. BASE (http://www.base-search.net/) indexiert.
 Falls Sie Fragen haben, Fehler entdecken, zu einem späteren Zeitpunkt eine Änderung der Daten wünschen sollten oder Kritik an Phaidra-push äußern möchten, wenden Sie sich bitte an uns. Wir würden uns freuen, wenn Sie auch in Zukunft dieses Service nutzen und es Ihren KollegInnen weiterempfehlen.
 
 Mit freundlichen Grüßen
-Ihr Repository Management
+Ihr Phaidra Repository Management
 -------------------------
 Phaidra
 Universität Wien
@@ -25,14 +25,14 @@ You have submitted a file(s) on Phaidra-push.
 Document you submitted are:
                         [% FOREACH mypid IN pids %]                                                                                    
                   
-                                http://[% instance %]/view/[% mypid %]">http://[% instance %]/view/[% mypid %]</a></p></br>
+                                https://[% instance %]/view/[% mypid %]">https://[% instance %]/view/[% mypid %]</a></p></br>
                         [% END %]
 By now, it will also be indexed by scientific search engines like BASE (http://www.base-search.net/).
 Should you have any questions, require any corrections at a later moment or want to report any mistakes or comment on Phaidra-push, please do not hesitate to contact us! We would appreciate it, if you make use of u:scholar in the future as well and recommend it to your colleagues.
 
 
 Sincerely Yours
-Phaidra-push Repository Management
+Phaidra Repository Management
 -------------------------
 Phaidra
 Vienna University

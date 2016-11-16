@@ -1,19 +1,19 @@
         <html>
-                <body>                  
-                [% IF !language || language == 'de' %]          
+                <body>
+                [% IF !language || language == 'de' %]
                         <p>Sehr geehrte/r Phaidra-push Nutzer/in,</p>
                         <p>Sie haben in Phaidra-push eine Datei erfolgreich forgelegt.</p>
                         <p>Die Dokument(en) der Sie forgelegt haben, sind:</p>
-                        [% FOREACH mypid IN pids %]                                                                                    
-                  
-                                  <a href="http://[% instance %]/view/[% mypid %]">http://[% instance %]/view/[% mypid %]</a></p></br>
+                        [% FOREACH mypid IN pids %]
+
+                                  <a href="https://[% instance %]/view/[% mypid %]">https://[% instance %]/view/[% mypid %]</a></p></br>
                         [% END %]
                         <p>Ab sofort wird es auch von wissenschaftlichen Suchmaschinen wie z.B. BASE (<a href="http://www.base-search.net/">http://www.base-search.net/</a>) indexiert.</p>
                         <p>Falls Sie Fragen haben, Fehler entdecken, zu einem späteren Zeitpunkt eine Änderung der Daten wünschen sollten oder Kritik an Phaidra-push äußern möchten, wenden Sie sich bitte an uns. Wir würden uns freuen, wenn Sie auch in Zukunft dieses Service nutzen und es Ihren KollegInnen weiterempfehlen.</p>
                         <p>Mit freundlichen Grüßen</p>
                         <p>Ihr Repository Management</p>
                         <p>-------------------------</p>
-                        <p><a href="http://[% baseurl %]">Phaidra-push</a></p>
+                        <p><a href="https://[% instance %]">Phaidra</a></p>
                         <p>Universität Wien</p>
                         <p>Bibliotheks- und Archivwesen</p>
                         <p>Tel. +43xxxxxxxxxxx</p>
@@ -24,20 +24,20 @@
                         <p>Dear user of Phaidra-push,</p>
                         <p>You have succesfuly submitted  your document(s).</p>
                         <p>Document you submitted are:</p>
-                        [% FOREACH mypid IN pids %]                                                                                    
+                        [% FOREACH mypid IN pids %]
 
-                                  <a href="http://[% instance %]/view/[% mypid %]">http://[% instance %]/view/[% mypid %]</a></p></br>
+                                  <a href="https://[% instance %]/view/[% mypid %]">https://[% instance %]/view/[% mypid %]</a></p></br>
                         [% END %]
                         <p>By now, it will also be indexed by scientific search engines like BASE (<a href="http://www.base-search.net/">http://www.base-search.net/</a>).</p>
                         <p>Should you have any questions, require any corrections at a later moment or want to report any mistakes or comment on phaidra-push, please do not hesitate to contact us! We would appreciate it, if you make use of Phaidra in the future as well and recommend it to your colleagues.</p>
                         <p>Sincerely Yours</p>
                         <p>Phaidra Repository Management</p>
                         <p>-------------------------</p>
-                        <p><a href="http://[% instance %]">Phaidra</a></p>
+                        <p><a href="https://[% instance %]">Phaidra</a></p>
                         <p>Vienna University</p>
                         <p>Library and Archive Services</p>
                         <p>Tel. +431xxxxxxxxxxxx</p>
-                        <p><a href="mailto:[% supportemail %]">[% supportemail %]</a></p>                       
+                        <p><a href="mailto:[% supportemail %]">[% supportemail %]</a></p>
                 [% END %]
                 </body>
         </html>

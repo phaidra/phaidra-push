@@ -18,6 +18,7 @@ use MIME::Lite::TT::HTML;
 use Encode qw(is_utf8 encode decode);
 
 
+
 $ENV{MOJO_INACTIVITY_TIMEOUT} = 7200;
 $ENV{MOJO_MAX_MESSAGE_SIZE} = 116777216;
 
@@ -34,7 +35,7 @@ my $filename = '/home/michal/Documents/code/area42/user/mf/phaidra-push/PhaidraP
 #my $filename             = $ARGV[0];
 my $phaidraConfingAdress = '/media/phaidra-entw_root/etc/phaidra.yml';
 #my $phaidraConfingAdress = $ARGV[1];
-my $filenameAgent = '/home/michal/Documents/code/area42/user/mf/phaidra-push/lib/jobs_agent_phaidra_entw.json';
+my $filenameAgent = '/home/michal/Documents/code/area42/user/mf/phaidra-push/lib/PhaidraPushAgent/phaidraPushJobsAgent.json';
 #my $filenameAgent        = $ARGV[2];
 
 #read PhaidraPush.json
@@ -59,16 +60,19 @@ my $config_agent = $json_agent->decode($json_text_agent);
 
 
 my $client = MongoDB::Connection->new(
-    host     =>     $config->{mongodb_phaidrapush}->{host}, 
-    port     =>     $config->{mongodb_phaidrapush}->{port}, 
+    host     =>     $config->{phaidra}->{mongodb}->{host}, 
+    port     =>     $config->{phaidra}->{mongodb}->{port}, 
     username =>     $config->{phaidra}->{mongodb}->{username},
     password =>     $config->{phaidra}->{mongodb}->{password},
     db_name  =>     $config->{phaidra}->{mongodb}->{database}
 );
 
+my $originInstanceBaseUrl = $config->{'phaidra-temp'}->{baseurl};
+
 
 my $collectionJobs = $client->ns( $config->{phaidra}->{mongodb}->{database}.'.'.'jobs');
 my $collectionBags = $client->ns( $config->{phaidra}->{mongodb}->{database}.'.'.'bags');
+
 
 
 my $config2           = YAML::Syck::LoadFile( $phaidraConfingAdress );
@@ -85,12 +89,13 @@ my $scheme = "https";
 my $ua = Mojo::UserAgent->new;
 
 
-sub getMetadata($);
-sub getOctetsFileExtensionAndMimetype($);
-sub getCModel($);
-sub sendEmailToOwner($);
+sub getMetadata($$);
+sub getCModel($$);
+sub sendEmail($$);
 sub jobIsComplete($);
-
+sub addFieldToAlerts($$$);
+sub addReferenceNumber($$$);
+sub arrayInsertAfterPosition($$$);
 
 ##################################################################
 ##################################################################
@@ -98,113 +103,126 @@ sub jobIsComplete($);
 ##################################################################
 ##################################################################
 
+
 while(1){
    sleep(5);
-   print "Start of the while loop!\n";
+   #print "Start of the while loop!\n";
    my $dataSetPU = $collectionJobs->find({'agent' => 'push_agent' });
    while (my $push_agent = $dataSetPU->next) {
-           print 'id:',Dumper($push_agent->{_id}->{value}), "\n";
-           print 'status:',Dumper($push_agent->{status}), "\n";
            my $id = MongoDB::OID->new($push_agent->{_id}->{value});
            if($push_agent->{status} eq 'new'){
+                my $idJob = MongoDB::OID->new($push_agent->{_id}->{value});
+                $collectionJobs->update({"_id" => $idJob} , {'$set' => {'status' => 'processing', 'time' => time }});
+                my @jobAlerts;
                 my @bagsNode; 
-                my $errorOccurred = 0;
-                my @error;
                 foreach my $mypid (@{$push_agent->{old_pid}}){
-                        my $cmodel_result    = getCModel($mypid);
-                        my $dataExt_result      = getOctetsFileExtensionAndMimetype($mypid);
-                        print '$dataExt_result:', Dumper($dataExt_result);
-                        my $metadata_result = getMetadata($mypid);;
-                        
-                        my $metadata;
-                        if(defined $metadata_result->{error}){
-                               print 'error metadata', "\n";
-                               push @error, $metadata_result->{error};
-                               $errorOccurred = 1;
-                        }else{
-                               $metadata = $metadata_result->{result};
-                        }
-                        
-                        my $cmodel;
-                        print '$cmodel_result:', Dumper($cmodel_result);
-                        if(defined $cmodel_result->{error}){
-                               print 'error $cmodel', "\n";
-                               push @error, $cmodel_result->{error};
-                               $errorOccurred = 1;
-                        }else{
-                               $cmodel = $cmodel_result->{result};
-                        }
-                        print '$cmodel:', Dumper($cmodel);
-                        
-                        my $mimeType;
-                        my $dataExt;
-                        if(defined $dataExt_result->{error}){
-                               print 'error $dataExt', "\n";
-                               push @error, $dataExt_result->{error};
-                               $errorOccurred = 1;
-                        }else{
-                               $dataExt = $dataExt_result->{result};
-                               $mimeType  = $dataExt->{mimetype};
-                        }
-                        print 'error:',Dumper(\@error);
-                        if((scalar @error) eq 0){
-                                my $bagID     = $collectionBags->insert_one({
-                                                       metadata_response    => $metadata,
+                        my $resultAlerts= { alerts => [], status => 200 , ts => time};
+                        my $cmodel_result       = getCModel($mypid, $resultAlerts);
+                        my $metadata_result     = getMetadata($mypid, $resultAlerts);                     
+                        my $bagID;
+                        my $bagIDPhaidraPush = $push_agent->{origin_instance}.$mypid;
+                        $bagIDPhaidraPush =~ s/\W//g;
+                        my @jobs;
+                        push @jobs, {'jobid' => $push_agent->{_id}->{value}};
+                        if($resultAlerts->{status}  == 200){
+                                $bagID     = $collectionBags->insert_one({
+                                                       metadata    => $metadata_result->{metadata},
+                                                       cmodel      => $cmodel_result,
                                                        ts          => time,
                                                        owner       => $push_agent->{owner},
                                                        status      => 'new',
                                                        type        => $push_agent->{type},
-                                                       mimetype    => $mimeType,
-                                                       cmodel      => $cmodel,
+                                                       cmodel      => $cmodel_result,
                                                        origin_instance => $push_agent->{origin_instance},
-                                                       job_id      => $push_agent->{_id}->{value},
-                                                       old_pid     => $mypid
+                                                       jobs        => \@jobs,
+                                                       project     => 'phaidra-push',
+                                                       old_pid     => $mypid,
+                                                       alerts      => $resultAlerts,
+                                                       bagid       => $bagIDPhaidraPush
                                                     });
                                 my $bagNode;
-                                $bagNode->{bad_id} = $bagID->{inserted_id}->{value};
+                                $bagNode->{bag_id} = $bagID->{inserted_id}->{value};
                                 $bagNode->{old_pid} = $mypid;
                                 push @bagsNode, $bagNode;
                         }else{
-         
+                             $bagID = $collectionBags->insert_one({
+                                                           metadata => $metadata_result->{metadata},
+                                                           cmodel      => $cmodel_result,
+                                                           ts          => time,
+                                                           owner       => $push_agent->{owner},
+                                                           status      => 'error_creating_bag',
+                                                           type        => $push_agent->{type},
+                                                           cmodel      => $cmodel_result,
+                                                           origin_instance => $push_agent->{origin_instance},
+                                                           jobs        => \@jobs,
+                                                           project     => 'phaidra-push',
+                                                           old_pid     => $mypid,
+                                                           alerts      => $resultAlerts,
+                                                           bagid       => $bagIDPhaidraPush
+                                                          });
+                                my $bagNode;
+                                $bagNode->{bag_id} = $bagID->inserted_id()->value();
+                                $bagNode->{old_pid} = $mypid;
+                                push @bagsNode, $bagNode;
                         }
+                        my $bagAlerts;
+                        $bagAlerts->{bag_id} = $bagID->inserted_id()->value();
+                        $bagAlerts->{alerts} = $resultAlerts;
+                        push @jobAlerts, $bagAlerts;
                 }
-                my $idJob = MongoDB::OID->new($push_agent->{_id}->{value});
-                if($errorOccurred){
-                        $collectionJobs->update({"_id" => $idJob} , {'$set' => {'status' => 'error', 'errors' => \@error, 'time' => time}});
+                my $allBagsCreatedWhitoutError = 1;
+                foreach my $alert (@jobAlerts){
+                    if(defined $alert->{alerts}){
+                          if(defined $alert->{alerts}->{status}){
+                                if($alert->{alerts}->{status} ne 200){
+                                      $allBagsCreatedWhitoutError = 0;
+                                }
+                          }
+                    }
+                }
+                if(!$allBagsCreatedWhitoutError){
+                        $collectionJobs->update({"_id" => $idJob} , {'$set' => {'status' => 'error', 'errors' => \@jobAlerts, 'time' => time, 'bags' => \@bagsNode}});
                 }else{
-                        $collectionJobs->update({"_id" => $idJob} , {'$set' => {'status' => 'bags_created', 'time' => time}});
+                        $collectionJobs->update({"_id" => $idJob} , {'$set' => {'status' => 'scheduled', 'time' => time, 'bags' => \@bagsNode}});
                 }
-                # add bags to Jobs collection
-                $collectionJobs->update({"_id" => $idJob} , {'$set' => {'bags' => \@bagsNode}});
            }
            #send email if job complete
-           if($push_agent->{status} eq 'bags_created'){
-                   my $jobIsComplete = 1;
+           if($push_agent->{status} eq 'finished' &&  $push_agent->{user_notified} ne 1){
+                   my $jobIsSuccessfullyCompleted = 1;
                    foreach my $bag (@{$push_agent->{bags}}){
-                           if( !(defined $bag->{old_pid} && defined $bag->{new_pid}) ){
-                                  $jobIsComplete = 0;
+                           if( !defined $bag->{new_pid} ){
+                                  $jobIsSuccessfullyCompleted = 0;
                            }
                    }
-                   print '$jobIsComplete:',$jobIsComplete, "\n";
-                   if($jobIsComplete){
-                         my $emailResult = sendEmailToOwner($push_agent->{bags});
-                         print '$emailResult:',Dumper($emailResult);
-                         my $idJob = MongoDB::OID->new($push_agent->{_id}->{value});
+                   my $idJob = MongoDB::OID->new($push_agent->{_id}->{value});
+                   if($jobIsSuccessfullyCompleted && $push_agent->{notify_user_on_success} == 1){
+                         my $emailResult = sendEmail($push_agent->{bags}, 'job_successful');
                          if(defined $emailResult->{status} && $emailResult->{status} eq 1){
-                                  print "aaaa\n";
-                                  $collectionJobs->update({"_id" => $idJob} , {'$set' => {'status' => 'bag_created__email_sent'}});
+                                   $collectionJobs->update({"_id" => $idJob} , {'$set' => {'status' => 'finished__email_sent'}});
                          }else{
-                                  print "bbb\n";
-                                  $collectionJobs->update({"_id" => $idJob} , {'$set' => {'status' => 'bag_created__email_sending_error'}});
                                   my $dataJobs = $collectionJobs->find_one({'_id' => $idJob });
                                   push @{$dataJobs->{errors}}, $emailResult->{error};
-                                  $collectionJobs->update({"_id" => $idJob} , {'$set' => {'errors' => $dataJobs->{errors} }});
+                                  $collectionJobs->update({"_id" => $idJob} , {'$set' => {'status' => 'finished__email_sending_error',
+                                                                                          'errors' => $dataJobs->{errors} }});
+                         }
+                   }else{
+                         my $emailResult = sendEmail($push_agent->{bags}, 'job_error');
+                         if(defined $emailResult->{status} && $emailResult->{status} eq 1){
+                                   $collectionJobs->update({"_id" => $idJob} , {'$set' => {'status' => 'not_complete__email_sent'}});
+                         }else{
+                                  my $dataJobs = $collectionJobs->find_one({'_id' => $idJob });
+                                  push @{$dataJobs->{errors}}, $emailResult->{error};
+                                  $collectionJobs->update({"_id" => $idJob} , {'$set' => {'status' => 'not_complete__email_sending_error',  
+                                                                                          'errors' => $dataJobs->{errors} }});
                          }
                    }
+                   $collectionJobs->update({"_id" => $idJob} , {'$set' => {'user_notified' => 1}});
            }
    }
    print "End of the while loop\n";
 }
+
+
 
 
 
@@ -225,13 +243,19 @@ sub jobIsComplete($){
 }
 
 
-sub sendEmailToOwner($){
+sub sendEmail($$){
 
       my $bags = shift;
+      my $type = shift;
       
-      print 'sending email:',Dumper($bags);
-
-      my $email = $config_agent->{email};
+      my $email;
+      if($type eq 'job_successful'){
+            $email = $config_agent->{email};
+      }else{
+            $email = $config_agent->{email_error};
+      }
+      
+      
       my $language = $config_agent->{language};
       my $baseurl = $config_agent->{baseurl};
       my $supportemail = $config_agent->{supportemail};
@@ -246,11 +270,15 @@ sub sendEmailToOwner($){
       }
 
       my @pids;
+      my @oldPids;
       foreach my $mybag (@{$bags}){
             push @pids, $mybag->{new_pid};
+            push @oldPids, $mybag->{old_pid};
       }
+      
       my %emaildata;
       $emaildata{pids} = \@pids;
+      $emaildata{oldpids} = \@oldPids;
       $emaildata{language} = $language;
       $emaildata{baseurl} = $baseurl;
       $emaildata{supportemail} = $supportemail;
@@ -264,7 +292,8 @@ sub sendEmailToOwner($){
       }
       
       my %options; 
-      $options{INCLUDE_PATH} = $config_agent->{template_include_path};
+      $options{INCLUDE_PATH} = $config_agent->{installation_dir}.$config_agent->{template_path};
+       
        
         eval
         {
@@ -289,7 +318,6 @@ sub sendEmailToOwner($){
                 return $result;
 
         }else{
-               print 'Email sent!',"\n";
                $result->{status} = 1;
                return $result;
         }
@@ -297,9 +325,11 @@ sub sendEmailToOwner($){
 }
 
 
-sub getCModel($){
- 
+sub getCModel($$){
+
      my $pid = shift;
+     my $resultAlerts = shift;
+    
     
      my $url = Mojo::URL->new;
      $url->scheme($scheme);
@@ -311,7 +341,6 @@ sub getCModel($){
          $url->path("/search/triples/");
      }
      $url->query({'q' => "<info:fedora/$pid> <info:fedora/fedora-system:def/model#hasModel> * "});
-     print 'getCModel $url:', $url,"\n";
      my $tx = $ua->get($url);
      if (my $res = $tx->success) {
           my $result_cmodel;
@@ -322,37 +351,57 @@ sub getCModel($){
                     chop $w[1];
                     $result_cmodel = $w[1];
                 }
-          } 
-          my $result->{result} = $result_cmodel;
-          return $result;
+          }
+          if(@{$tx->res->json->{alerts}}){
+                addFieldToAlerts($tx->res->json->{alerts}, '/search/triples/', 'step');
+                addFieldToAlerts($tx->res->json->{alerts}, time, 'ts');
+                addFieldToAlerts($tx->res->json->{alerts}, localtime, 'localtime');
+                push @{$resultAlerts->{alerts}}, $tx->res->json->{alerts} 
+          }
 
-        }else {
-          print "Error1:", Dumper($tx->error);
+          return $result_cmodel;
+      }else {
+          my $error;
           if($tx->res->json && exists($tx->res->json->{alerts})){
-               print 'Error2:', Dumper($tx->res->json->{alerts}), Dumper($tx->code);
-               my $error;
-               $error->{error} = $tx->res->json->{alerts};
-               $error->{error}->{step} = 'search/triples/';
-               $error->{error}->{old_pid} = $pid;
-               return $error;
+               $resultAlerts->{status} = 500;
+               if(@{$tx->res->json->{alerts}}){
+                        if (ref($tx->error) eq "HASH") {
+                            addFieldToAlerts($tx->res->json->{alerts}, $tx->error->{code}, 'code');
+                        }else{
+                            addFieldToAlerts($tx->res->json->{alerts}, $tx->error, 'code');
+                        }
+                        addFieldToAlerts($tx->res->json->{alerts}, '/search/triples/', 'step');
+                        addFieldToAlerts($tx->res->json->{alerts}, time, 'ts');
+                        addFieldToAlerts($tx->res->json->{alerts}, localtime, 'localtime');
+               }
+               push @{$resultAlerts->{alerts}}, $tx->res->json->{alerts};
+               
+               return;
           }else{
-               print 'Error3:', Dumper($tx->error);
-               my $error;
-               $error->{error} = $tx->error;
-               $error->{error}->{step} = 'search/triples/';
-               $error->{error}->{old_pid} = $pid;
-               return $error;
+               my $alert = {};
+               $resultAlerts->{status} = 500;
+               $alert->{msg} = 'Error accessing search triples: /search/triples/';
+               $alert->{type} = 'danger';
+               $alert->{step} = '/search/triples/';
+               $alert->{code} = 400;
+               $alert->{ts} = time;
+               $alert->{'localtime'} = localtime;
+               my @alerts;
+               push @alerts, $alert;
+               push @{$resultAlerts->{alerts}}, \@alerts;
+
+               return;
           }
      }
 
 }
 
-
-
-
-sub getMetadata($){
+sub getMetadata($$){
 
      my $pid = shift;
+     my $resultAlerts = shift;
+     
+     
      
      my $url = Mojo::URL->new;
      $url->scheme($scheme);
@@ -364,85 +413,217 @@ sub getMetadata($){
          $url->path("/object/$pid/metadata/");
      }   
      $url->query({'mode' => 'full'});
-     print 'getMetadata $url:', $url,"\n";
      my $tx = $ua->get($url);
      if (my $res = $tx->success) {
           my $res_data;        
           $res_data = $tx->res->json;
+          
           # because of special characters
           my $json = encode_json($res_data);
           utf8::decode($json);
+          
           $res_data = decode_json($json);
-          my $result;
-          $result->{result} = $res_data;
-          return $result;
+          
+          $res_data = addReferenceNumber($res_data, $pid, $resultAlerts);
+           
+          if(@{$tx->res->json->{alerts}}){
+                addFieldToAlerts($tx->res->json->{alerts}, 'object/pid/metadata/', 'step');
+                addFieldToAlerts($tx->res->json->{alerts}, time, 'ts');
+                addFieldToAlerts($tx->res->json->{alerts}, localtime, 'localtime');
+                push @{$resultAlerts->{alerts}}, $tx->res->json->{alerts};
+          }
+          return $res_data;
           
         }else {
-          print "Error1:", Dumper($tx->error);
           if($tx->res->json && exists($tx->res->json->{alerts})){
-               print 'Error2:', Dumper($tx->res->json->{alerts}), Dumper($tx->code);
-               my $error;
-               $error->{error} = $tx->res->json->{alerts};
-               $error->{error}->{step} = 'object/pid/metadata/';
-               $error->{error}->{old_pid} = $pid;
-               return $error;
+               $resultAlerts->{status} = 500;
+               if(@{$tx->res->json->{alerts}}){
+                        addFieldToAlerts($tx->res->json->{alerts}, $tx->error->{code}, 'code');
+                        addFieldToAlerts($tx->res->json->{alerts}, '/object/pid/metadata/', 'step');
+                        addFieldToAlerts($tx->res->json->{alerts}, time, 'ts');
+                        addFieldToAlerts($tx->res->json->{alerts}, localtime, 'localtime');
+               }
+               push @{$resultAlerts->{alerts}}, $tx->res->json->{alerts};
+               
+               return;
           }else{
-               print 'Error3:', Dumper($tx->error);
-               my $error;
-               $error->{error} = $tx->error;
-               $error->{error}->{step} = 'object/pid/metadata/';
-               $error->{error}->{old_pid} = $pid;
-               return $error;
+               my $alert = {};
+               $resultAlerts->{status} = 500;
+               $alert->{msg} = 'Error reading metadata: object/pid/metadata/';
+               $alert->{type} = 'danger';
+               $alert->{step} = '/object/pid/metadata/';
+               $alert->{code} = 400;
+               $alert->{ts} = time;
+               $alert->{'localtime'} = localtime;
+               my @alerts;
+               push @alerts, $alert;
+               push @{$resultAlerts->{alerts}}, \@alerts;
+               
+               return;
           }
         }
 
 }
 
+sub addReferenceNumber($$$){
 
-sub getOctetsFileExtensionAndMimetype($){
-
-    my $pid = shift;
+     my $metadata = shift;
+     my $pid = shift;
+     my $resultAlerts = shift;
     
-     my $url = Mojo::URL->new;
-     $url->scheme($scheme);
-     $url->host($base[0]);
-     $url->userinfo("$fedoraadminuser:$fedoraadminpass");
-     if(exists($base[1])){
-         $url->path($base[1]."/object/$pid/techinfo");
-     }else{
-         $url->path("/object/$pid/techinfo");
-     }
-     $url->query({'format' => 'xml'});
-     #print 'getOctetsFileExtension $url:', $url,"\n";
-     my $tx = $ua->get($url);
-     if (my $res = $tx->success) {
-             my $result;
-             $result->{mimetype} = $tx->res->dom->at('mimetype')->text;
-             $result->{filetype} = $tx->res->dom->at('filetype')->text;
-             my $result2;
-             #print 'getOctetsFileExtensionAndMimetype $tx->res:', Dumper($tx->res);
-             print 'getOctetsFileExtensionAndMimetype:', Dumper($result);
-             $result2->{result} = $result;
-             return $result2;
-     }else {
-          print "Error1:", Dumper($tx->error);
-          if($tx->res->json && exists($tx->res->json->{alerts})){   
-               print 'Error2:', Dumper($tx->res->json->{alerts}), Dumper($tx->code);
-               my $error;
-               $error->{error} = $tx->res->json->{alerts};
-               $error->{error}->{step} = 'object/pid/techinfo/';
-               $error->{error}->{old_pid} = $pid;
-               return $error;
-          }else{
-               print 'Error3:', Dumper($tx->error);
-               my $error;
-               $error->{error} = $tx->error;
-               $error->{error}->{step} = 'object/pid/techinfo/';
-               $error->{error}->{old_pid} = $pid;
-               return $error;
-          }
-     } 
+     my $histkultExist = 0;
+     if(defined $metadata->{metadata}){
+            if(defined $metadata->{metadata}->{uwmetadata}){
+                   my $metadataLenght = scalar @{ $metadata->{metadata}->{uwmetadata} };
+                   my $i = 0;
+                   my $histkultIndex;
+                   foreach  ( @{$metadata->{metadata}->{uwmetadata}} ){
+                         if($_->{xmlname} eq 'histkult' ){
+                                $histkultExist = 1;
+                                $histkultIndex = $i;
+                         }
+                         $i++;
+                   }
 
+                   my $histkult;
+                   $histkult->{xmlname} = 'histkult';
+                   $histkult->{xmlns} = 'http://phaidra.univie.ac.at/XML/metadata/histkult/V1.0';
+                   $histkult->{datatype} = 'Node';
+                   $histkult->{children} = [];
+     
+                   my $referenceNumber;
+                   $referenceNumber->{xmlname} = 'reference_number';
+                   $referenceNumber->{xmlns} = 'http://phaidra.univie.ac.at/XML/metadata/histkult/V1.0';
+                   $referenceNumber->{datatype} = 'Node';
+                   $referenceNumber->{children} = [];
+     
+                   my $reference;
+                   $reference->{xmlname} = 'reference';
+                   $reference->{xmlns} = 'http://phaidra.univie.ac.at/XML/metadata/histkult/V1.0';
+                   $reference->{ui_value} = 'http://phaidra.univie.ac.at/XML/metadata/histkult/V1.0/voc_25/1562604'; 
+                   $reference->{datatype} = 'Vocabulary';
+     
+                   my $number;
+                   $number->{xmlname} = 'number';
+                   $number->{xmlns} = 'http://phaidra.univie.ac.at/XML/metadata/histkult/V1.0';
+                   $number->{ui_value} = $originInstanceBaseUrl.'/'.$pid; 
+                   $number->{datatype} = 'CharacterString';
+     
+                   push @{$referenceNumber->{children}}, $reference, $number;
+                   
+                   
+                   
+                   #add 'histkult' after 'organization' node
+                   if(!$histkultExist){
+                         push @{$histkult->{children}}, $referenceNumber;
+                         my $index = 0;
+                         my $idAfterToAdd;
+                         foreach ( @{$metadata->{metadata}->{uwmetadata}} ){
+                               if($_->{xmlname} eq 'rights' ){
+                                       $idAfterToAdd = $index;
+                               }
+                               $index++;
+                         }
+                         $index = 0;
+                         foreach ( @{$metadata->{metadata}->{uwmetadata}} ){
+                               if($_->{xmlname} eq 'annotation' ){
+                                       $idAfterToAdd = $index;
+                               }
+                               $index++;
+                         }
+                         $index = 0;
+                         foreach ( @{$metadata->{metadata}->{uwmetadata}} ){
+                               if($_->{xmlname} eq 'classification' ){
+                                       $idAfterToAdd = $index;
+                               }
+                               $index++;
+                         }
+                         $index = 0;
+                         foreach ( @{$metadata->{metadata}->{uwmetadata}} ){
+                               if($_->{xmlname} eq 'organization' ){
+                                       $idAfterToAdd = $index;
+                               }
+                               $index++;
+                         }
+                         if(defined $idAfterToAdd){
+                               my @metadataTemp;
+                               push @metadataTemp, @{$metadata->{metadata}->{uwmetadata}}[0..$idAfterToAdd], $histkult,  @{$metadata->{metadata}->{uwmetadata}}[$idAfterToAdd+1..$metadataLenght-1];
+                               $metadata->{metadata}->{uwmetadata} = \@metadataTemp;
+                         }else{
+                              my $alert = {};
+                              $resultAlerts->{status} = 500;
+                              $alert->{msg}  = 'Error adding reference_number.';
+                              $alert->{type} = 'warning';
+                              $alert->{code} = 400;
+                              $alert->{ts}   = time;
+                              $alert->{'localtime'} = localtime;
+                              my @alerts;
+                              push @alerts, $alert;
+                              push @{$resultAlerts->{alerts}}, \@alerts;
+                         }
+                   }else{
+                         #add 'reference_number' after 'inscription' and 'dimensions' nodes
+                         if($metadata->{metadata}->{uwmetadata}[$histkultIndex]->{children}){
+                                 my $index = 0;
+                                 my $idAfterToAdd = -1;
+                                 foreach ( @{$metadata->{metadata}->{uwmetadata}[$histkultIndex]->{children}} ){
+                                      if($_->{xmlname} eq 'inscription' ){
+                                            $idAfterToAdd = $index;
+                                      }
+                                      $index++;
+                                 }
+                                 $index = 0;
+                                 foreach ( @{$metadata->{metadata}->{uwmetadata}[$histkultIndex]->{children}} ){
+                                      if($_->{xmlname} eq 'dimensions' ){
+                                            $idAfterToAdd = $index;
+                                      }
+                                      $index++;
+                                 }
+                                 $metadata->{metadata}->{uwmetadata}[$histkultIndex]->{children} = arrayInsertAfterPosition($metadata->{metadata}->{uwmetadata}[$histkultIndex]->{children}, $idAfterToAdd, $referenceNumber);
+                         }else{
+                                 push @{$metadata->{metadata}->{uwmetadata}[$histkultIndex]->{children}}, $referenceNumber;
+                         }
+                   }
+            }
+     }
+     
+     return $metadata;
+}
+
+
+sub arrayInsertAfterPosition($$$)
+{
+  my ($inArray, $inPosition, $inElement) = @_;
+  my @res         = ();
+  my @after       = ();
+  my $arrayLength = int @{$inArray};
+
+  if ($inPosition < 0) { @after = @{$inArray}; }
+  else {
+         if ($inPosition >= $arrayLength)    { $inPosition = $arrayLength - 1; }
+         if ($inPosition < $arrayLength - 1) { @after = @{$inArray}[($inPosition+1)..($arrayLength-1)]; }
+       }
+
+  push (@res, @{$inArray}[0..$inPosition],
+              $inElement,
+              @after);
+
+  return \@res;
+}
+
+
+sub addFieldToAlerts($$$){
+
+     my $alerts = shift;
+     my $fieldValue = shift;
+     my $fieldName = shift;
+     
+     if(@{$alerts}){
+         foreach my $alert (@{$alerts}){
+                 $alert->{$fieldName} = $fieldValue;
+         }
+     }
+     return $alerts;
 }
 
 
