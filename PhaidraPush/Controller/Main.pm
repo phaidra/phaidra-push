@@ -14,7 +14,7 @@ use PhaidraPush::Model::Email;
 
 use base 'MojoX::Session::Store';
 use Mango 0.24;
-__PACKAGE__->attr('mango');
+__PACKAGE__->attr('mango'); 
 
 sub home {
   my $self = shift;  
@@ -50,7 +50,7 @@ sub push {
   $self->app->log->debug('$objects123:',$self->app->dumper($objects));
   #$self->app->log->debug(@{$objects}[0]);
 
-  my $entwDataSet = $self->mango_phaidra->db->collection('jobs')->insert({
+  my $entwDataSet = $self->mango_bagger->db->collection('jobs')->insert({
                                                                            'old_pid' => $objects, 
                                                                            'type' => 'push', 
                                                                            'owner' => $self->current_user->{username}, 

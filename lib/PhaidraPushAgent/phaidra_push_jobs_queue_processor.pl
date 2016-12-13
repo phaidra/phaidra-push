@@ -57,18 +57,18 @@ my $config = $json->decode($json_text);
 
 
 my $client = MongoDB::Connection->new(
-    host     =>     $config->{phaidra}->{mongodb}->{host},
-    port     =>     $config->{phaidra}->{mongodb}->{port},
-    username =>     $config->{phaidra}->{mongodb}->{username},
-    password =>     $config->{phaidra}->{mongodb}->{password},
-    db_name  =>     $config->{phaidra}->{mongodb}->{database}
+    host     =>     $config->{bagger}->{mongodb}->{host},
+    port     =>     $config->{bagger}->{mongodb}->{port},
+    username =>     $config->{bagger}->{mongodb}->{username},
+    password =>     $config->{bagger}->{mongodb}->{password},
+    db_name  =>     $config->{bagger}->{mongodb}->{database}
 );
 
 
 
 while (1) {
-     my $collectionJobs = $client->ns( $config->{phaidra}->{mongodb}->{database}.'.'.'jobs');
-     my $dataSetPU = $collectionJobs->find({'status' => 'new', 'agent' => 'push_agent'});
+     my $collectionJobs = $client->ns( $config->{bagger}->{mongodb}->{database}.'.'.'jobs');
+     my $dataSetPU = $collectionJobs->find({'status' => {'$regex' => "new|finished"}, 'agent' => 'push_agent'});
      my $exists = $dataSetPU->count();
      if($exists){
            my $agent = Phaidra_push_jobs_agent->new(

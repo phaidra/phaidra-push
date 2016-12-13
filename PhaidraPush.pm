@@ -115,6 +115,9 @@ sub startup {
     
   });
 
+  $self->attr(_mango_bagger => sub { return Mango->new('mongodb://'.$config->{bagger}->{mongodb}->{username}.':'.$config->{bagger}->{mongodb}->{password}.'@'.$config->{bagger}->{mongodb}->{host}.'/'.$config->{bagger}->{mongodb}->{database}) });
+  $self->helper(mango_bagger => sub { return shift->app->_mango_bagger});
+  
   $self->attr(_mango_phaidrapush => sub { return Mango->new('mongodb://'.$config->{mongodb_phaidrapush}->{username}.':'.$config->{mongodb_phaidrapush}->{password}.'@'.$config->{mongodb_phaidrapush}->{host}.'/'.$config->{mongodb_phaidrapush}->{database}) });
   $self->helper(mango_phaidrapush => sub { return shift->app->_mango_phaidrapush});
 

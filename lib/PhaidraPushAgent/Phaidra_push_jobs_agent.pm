@@ -70,15 +70,15 @@ sub new {
         my $config_phaidra_push_job_agent = $json->decode($json_text_agent);
         
         my $client_phaidra_push = MongoDB::Connection->new(
-           host     =>     $phaidra_push_config->{phaidra}->{mongodb}->{host}, 
-           port     =>     $phaidra_push_config->{phaidra}->{mongodb}->{port}, 
-           username =>     $phaidra_push_config->{phaidra}->{mongodb}->{username},
-           password =>     $phaidra_push_config->{phaidra}->{mongodb}->{password},
-           db_name  =>     $phaidra_push_config->{phaidra}->{mongodb}->{database}
+           host     =>     $phaidra_push_config->{bagger}->{mongodb}->{host}, 
+           port     =>     $phaidra_push_config->{bagger}->{mongodb}->{port}, 
+           username =>     $phaidra_push_config->{bagger}->{mongodb}->{username},
+           password =>     $phaidra_push_config->{bagger}->{mongodb}->{password},
+           db_name  =>     $phaidra_push_config->{bagger}->{mongodb}->{database}
         );
 
-        my $collectionJobs = $client_phaidra_push->ns( $phaidra_push_config->{phaidra}->{mongodb}->{database}.'.'.'jobs');
-        my $collectionBags = $client_phaidra_push->ns( $phaidra_push_config->{phaidra}->{mongodb}->{database}.'.'.'bags');
+        my $collectionJobs = $client_phaidra_push->ns( $phaidra_push_config->{bagger}->{mongodb}->{database}.'.'.'jobs');
+        my $collectionBags = $client_phaidra_push->ns( $phaidra_push_config->{bagger}->{mongodb}->{database}.'.'.'bags');
         
 
         my $configPhaidra     = YAML::Syck::LoadFile( $phaidraOriginConfing );

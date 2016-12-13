@@ -36,6 +36,15 @@
           "database": "entw"
         }
     },
+    "bagger":{
+          "mongodb": {
+                "host": "stage.phaidra.org",
+                "port": "27017",
+                "username": "xxxx",
+                "password": "xxxx",
+                "database": "bagger-rastanb"
+          } 
+    },
     "email":{
             "instance": "phaidra.univie.ac.at",
             "email": "examplea@example.com",
