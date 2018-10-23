@@ -91,11 +91,11 @@ sub startup {
       if (my $res = $tx->success) {
             
             # save token
-            my $token = $tx->res->cookie($self->app->config->{authentication}->{token_cookie})->value;  
+            my $token = $tx->res->json->{$self->app->config->{authentication}->{token_cookie}};  
       
             $self->save_token($token);
             
-            $self->app->log->info("User $username successfuly authenticated");
+            $self->app->log->info("User $username successfuly authenticated token[$token]");
             $self->stash({phaidra_auth_result => { token => $token , alerts => $tx->res->json->{alerts}, status  =>  200 }});
             
             return $username;

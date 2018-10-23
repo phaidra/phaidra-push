@@ -87,7 +87,7 @@ sub send_email
         {
                 my $msg = MIME::Lite::TT::HTML->new(
                         From        => $emailConf->{From},
-                        To          => $emailConf->{email},
+                        To          => $email,
                         Subject     => $subject,
                         Charset     => 'utf8',
                         Encoding    => 'quoted-printable',

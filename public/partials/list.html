@@ -48,7 +48,7 @@
 										  <li><a href="#" ng-click="resetSelection()">Unselect all</a></li>
 										  <li><a href="#" ng-click="selectAll()">Select all</a></li>
 										  <li><a href="#/delete_selection/">Delete selected...</a></li>
-										  <li><a ng-click="checkSimpleOnly()">Publish selected...</a></li>
+										  <!--<li><a ng-click="checkSimpleOnly()">Publish selected...</a></li>-->
 										</ul>																			  		
 								  	</th>
 								  	<th></th>
@@ -57,7 +57,7 @@
 								    <th ng-class="{'th-sorted': isSortedBy('fgs.createdDate,STRING')}"><a href="#" ng-click="setSort(instance, 'fgs.createdDate,STRING')">Created</a></th>
 								    <th ng-class="{'th-sorted': isSortedBy('fgs.lastModifiedDate,STRING')}"><a href="#" ng-click="setSort(instance, 'fgs.lastModifiedDate,STRING')">Updated</a></th>
 								    <th ng-if="instance == 'phaidra-temp'" class="muted" translate>DELETE</th>
-								    <th ng-if="instance == 'phaidra-temp'" class="muted">Publish</th>
+								    <!--<th ng-if="instance == 'phaidra-temp'" class="muted">Publish</th>-->
 								  </tr>
 							  </thead>
 							  <tbody>
@@ -69,7 +69,7 @@
 								    <td bind-once ><span class="list-date">{{object['fgs.createdDate'] | date:'dd.MM.yyyy'}}</span></td>
 								    <td bind-once ><span class="list-date">{{object['fgs.lastModifiedDate'] | date:'dd.MM.yyyy'}}</span></td>
 								    <td ng-if="instance == 'phaidra-temp'" bind-once ><a href="#/delete/{{object.PID}}"><i class="fi-trash"></i></a></td>
-								  	<td ng-if="instance == 'phaidra-temp'" bind-once ><a ng-if="isSimpleObject(object)" href="#/push/{{object.PID}}"><i class="fi-arrow-right"></i></a></td>
+								  	<!--<td ng-if="instance == 'phaidra-temp'" bind-once ><a ng-if="isSimpleObject(object)" href="#/push/{{object.PID}}"><i class="fi-arrow-right"></i></a></td>-->
 								  </tr>
 							  </tbody>
 					</table>

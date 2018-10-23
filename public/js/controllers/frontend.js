@@ -545,6 +545,7 @@ var SigninModalCtrl = function ($scope, $modalInstance, FrontendService, pT) {
       promise.then(
         function(response) {
           $scope.alerts = response.data.alerts;
+          //alert(response.data['XSRF-TOKEN']);
           $modalInstance.close();
           var red = $('#signin').attr('data-redirect');
           if(red){

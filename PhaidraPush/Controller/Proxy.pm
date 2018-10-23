@@ -48,6 +48,7 @@ sub search {
     $url->query(\%params);
 	
 	my $temp_token = $self->load_token;
+	$self->app->log->debug('using token: '.$temp_token);
 	
   	$self->ua->get($url => sub { 	
   		my ($ua, $tx) = @_;
